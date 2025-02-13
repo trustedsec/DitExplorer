@@ -5,5 +5,9 @@
              >
 	<Application.Resources>
 		<BooleanToVisibilityConverter x:Key="boolVis"/>
+
+		<Style TargetType="{x:Type ListViewItem}">
+			<Setter Property="Margin" Value="0"/>
+		</Style>
 	</Application.Resources>
 </Application>
