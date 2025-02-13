@@ -1,0 +1,143 @@
+﻿<Window x:Class="DitExplorer.UI.WpfApp.DatabaseSchemaWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DitExplorer.UI.WpfApp"
+        xmlns:b="clr-namespace:DitExplorer.UI.Behaviors;assembly=DitExplorer.UI.Core"
+		d:DataContext="{d:DesignInstance Type=local:DatabaseSchemaViewModel}"
+		mc:Ignorable="d"
+		FocusManager.FocusedElement="{Binding ElementName=tablesList}"
+		b:CommandFrame.CommandHandler="{Binding}"
+        Title="{Binding Title}" Height="450" Width="800">
+	<Grid>
+		<TabControl>
+			<TabItem Header="{x:Static local:Messages.Schema_TablesAccessText}">
+				<Grid>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="200"/>
+						<ColumnDefinition Width="6"/>
+						<ColumnDefinition Width="*"/>
+					</Grid.ColumnDefinitions>
+
+					<DockPanel>
+						<ToolBarPanel DockPanel.Dock="Top">
+							<ToolBar>
+								<Button Command="{x:Static local:MyCommands.ExportTableData}">
+									<AccessText Text="{x:Static local:Messages.File_ExportTableDataMenuText}"/>
+								</Button>
+							</ToolBar>
+						</ToolBarPanel>
+
+						<ListView
+							x:Name="tablesList"
+							ItemsSource="{Binding Tables}"
+							SelectedItem="{Binding SelectedTable}"
+							b:ListViewSorting.IsSortingEnabled="True"
+							>
+							<ListView.View>
+								<GridView>
+									<GridViewColumn Header="{x:Static local:Messages.General_NameColumnHeader}" DisplayMemberBinding="{Binding TableName}"/>
+									<!-- In practice, these values are always zero -->
+									<!--<GridViewColumn Header="{x:Static local:Messages.DatabaseSchemaViewer_RecordCount}" DisplayMemberBinding="{Binding RecordCount}"/>
+									<GridViewColumn Header="{x:Static local:Messages.DatabaseSchemaViewer_PagesUsed}" DisplayMemberBinding="{Binding PagesUsed}"/>-->
+								</GridView>
+							</ListView.View>
+						</ListView>
+
+					</DockPanel>
+
+					<GridSplitter
+						Grid.Column="1"
+						ResizeDirection="Columns"
+						ResizeBehavior="PreviousAndNext"
+						HorizontalAlignment="Stretch"
+						VerticalAlignment="Stretch"
+						/>
+
+					<TabControl Grid.Column="2">
+						<TabItem Header="{x:Static local:Messages.Schema_ColumnsAccessText}">
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="Auto"/>
+									<RowDefinition Height="*"/>
+								</Grid.RowDefinitions>
+
+								<Grid>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="Auto"/>
+										<ColumnDefinition Width="6"/>
+										<ColumnDefinition Width="*"/>
+									</Grid.ColumnDefinitions>
+
+									<AccessText Text="{x:Static local:Messages.Edit_SearchLabel}" VerticalAlignment="Center"/>
+									<TextBox Grid.Column="2" Text="{Binding ColumnSearchText, UpdateSourceTrigger=PropertyChanged}" 
+											 Margin="6"/>
+								</Grid>
+
+								<ListView
+									Grid.Row="1"
+									ItemsSource="{Binding TableColumns}"
+									b:ListViewSorting.IsSortingEnabled="True"
+									b:ContextCommandService.CommandProvider="{Binding}"
+									>
+									<ListView.View>
+										<GridView>
+											<GridViewColumn Header="{x:Static local:Messages.General_NameColumnHeader}" DisplayMemberBinding="{Binding ColumnName}"/>
+											<GridViewColumn Header="ID" DisplayMemberBinding="{Binding ColumnIdValue}"/>
+											<GridViewColumn Header="Type" DisplayMemberBinding="{Binding ColumnType}"/>
+											<GridViewColumn Header="Max. Size" DisplayMemberBinding="{Binding MaxSize}"/>
+											<GridViewColumn Header="Fixed" DisplayMemberBinding="{Binding IsFixedSize}"/>
+											<GridViewColumn Header="Nonnull" DisplayMemberBinding="{Binding IsNotNull}"/>
+											<GridViewColumn Header="Multi" DisplayMemberBinding="{Binding IsMultiValued}"/>
+											<GridViewColumn Header="Tagged" DisplayMemberBinding="{Binding IsTagged}"/>
+										</GridView>
+									</ListView.View>
+								</ListView>
+							</Grid>
+						</TabItem>
+						<TabItem Header="{x:Static local:Messages.Schema_IndexesAccessText}">
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition Height="Auto"/>
+									<RowDefinition Height="*"/>
+								</Grid.RowDefinitions>
+
+								<Grid>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="Auto"/>
+										<ColumnDefinition Width="6"/>
+										<ColumnDefinition Width="*"/>
+									</Grid.ColumnDefinitions>
+
+									<AccessText Text="{x:Static local:Messages.Edit_SearchLabel}" VerticalAlignment="Center"/>
+									<TextBox Grid.Column="2" Text="{Binding IndexSearchText, UpdateSourceTrigger=PropertyChanged}" 
+											 Margin="6"/>
+								</Grid>
+
+								<ListView
+									Grid.Row="1"
+									ItemsSource="{Binding IndexColumns}"
+									b:ListViewSorting.IsSortingEnabled="True"
+									b:ContextCommandService.CommandProvider="{Binding}"
+									>
+									<ListView.View>
+										<GridView>
+											<GridViewColumn Header="Index Name" DisplayMemberBinding="{Binding IndexName}"/>
+											<GridViewColumn Header="Column Name" DisplayMemberBinding="{Binding ColumnName}"/>
+											<GridViewColumn Header="Index flags" DisplayMemberBinding="{Binding Flags}"/>
+											<GridViewColumn Header="Col. Type" DisplayMemberBinding="{Binding ColumnType}"/>
+											<GridViewColumn Header="Language" DisplayMemberBinding="{Binding LanguageId}"/>
+											<GridViewColumn Header="Codepage" DisplayMemberBinding="{Binding CodePage}"/>
+											<GridViewColumn Header="LCMap Flags" DisplayMemberBinding="{Binding LCMapFlags, StringFormat={}0x{0:X8}}"/>
+										</GridView>
+									</ListView.View>
+								</ListView>
+							</Grid>
+						</TabItem>
+					</TabControl>
+				</Grid>
+			</TabItem>
+		</TabControl>
+	</Grid>
+</Window>

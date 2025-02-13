@@ -1,0 +1,84 @@
+﻿<Window x:Class="DitExplorer.UI.WpfApp.ColumnChooserWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DitExplorer.UI.WpfApp"
+        xmlns:b="clr-namespace:DitExplorer.UI.Behaviors;assembly=DitExplorer.UI.Core"
+		d:DataContext="{d:DesignInstance Type=local:ColumnChooserViewModel}"
+		mc:Ignorable="d"
+		b:CommandFrame.CommandHandler="{Binding}"
+		WindowStyle="ToolWindow"
+		FocusManager.FocusedElement="{Binding ElementName=searchBox}"
+        Title="{x:Static local:Messages.ColumnChooser_Title}" Height="400" Width="500">
+	<Border Padding="3">
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"/>
+				<RowDefinition Height="*"/>
+				<RowDefinition Height="Auto"/>
+			</Grid.RowDefinitions>
+
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="6"/>
+					<ColumnDefinition Width="*"/>
+				</Grid.ColumnDefinitions>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto"/>
+					<RowDefinition Height="Auto"/>
+				</Grid.RowDefinitions>
+
+				<AccessText Text="{x:Static local:Messages.Edit_SearchLabel}" Margin="3"/>
+				<TextBox x:Name="searchBox" Text="{Binding ColumnSearch, UpdateSourceTrigger=PropertyChanged}" Grid.Column="2" Margin="3"/>
+
+				<AccessText Text="_Column set:" Margin="3" Grid.Row="1"/>
+				<ComboBox
+					Grid.Row="2"
+					Grid.Column="2"
+					Margin="3"
+					ItemsSource="{Binding ColumnSets}"
+					SelectedItem="{Binding SelectedColumnSet}"
+					/>
+			</Grid>
+
+			<ListView
+				Grid.Row="1"
+				ItemsSource="{Binding Columns}"
+				b:ListViewSorting.IsSortingEnabled="True"
+				Margin="3"
+				IsTextSearchEnabled="True"
+				TextSearch.TextPath="Name"
+				b:CheckedList.IsCheckingEnabled="True"
+				b:CheckedList.IsCheckedProperty="IsChecked"
+				>
+				<ListView.View>
+					<GridView>
+						<GridViewColumn Header="{x:Static local:Messages.General_NameColumnHeader}" b:ListViewSorting.SortProperty="Name">
+							<GridViewColumn.CellTemplate>
+								<DataTemplate>
+									<StackPanel Orientation="Horizontal">
+										<CheckBox IsChecked="{Binding IsChecked}"/>
+										<TextBlock Text="{Binding Name}" Margin="2 0 0 0"/>
+									</StackPanel>
+								</DataTemplate>
+							</GridViewColumn.CellTemplate>
+						</GridViewColumn>
+						<GridViewColumn Header="{x:Static local:Messages.General_DescriptionColumnHeader}" b:ListViewSorting.SortProperty="Description" DisplayMemberBinding="{Binding Description}"/>
+					</GridView>
+				</ListView.View>
+				<ListView.ItemContainerStyle>
+					<Style TargetType="{x:Type ListViewItem}">
+						<Setter Property="IsEnabled" Value="{Binding IsEnabled}"/>
+					</Style>
+				</ListView.ItemContainerStyle>
+			</ListView>
+
+			<StackPanel Grid.Row="2" HorizontalAlignment="Right" Orientation="Horizontal">
+				<Button Content="{x:Static local:Messages.App_OK}" Command="{x:Static local:MyCommands.Accept}" Margin="3" MinWidth="70" IsDefault="True"/>
+				<Button Content="{x:Static local:Messages.App_Cancel}" Command="{x:Static ApplicationCommands.Close}" Margin="3" MinWidth="70" IsCancel="True"/>
+			</StackPanel>
+		</Grid>
+	</Border>
+</Window>

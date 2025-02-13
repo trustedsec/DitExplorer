@@ -1,0 +1,252 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="App_Cancel" xml:space="preserve">
+    <value>_Cancel</value>
+  </data>
+  <data name="App_DitOpenFailed" xml:space="preserve">
+    <value>DIT Explorer encountered an error while opening the DIT file.</value>
+  </data>
+  <data name="App_OK" xml:space="preserve">
+    <value>_OK</value>
+  </data>
+  <data name="ColumnChooser_Title" xml:space="preserve">
+    <value>Column Chooser</value>
+  </data>
+  <data name="DatabaseSchemaViewer_Title" xml:space="preserve">
+    <value>Database Schema</value>
+  </data>
+  <data name="Edit_CopyDnMenuText" xml:space="preserve">
+    <value>Copy _DN</value>
+  </data>
+  <data name="Edit_CopyItemsMenuText" xml:space="preserve">
+    <value>_Copy Selection</value>
+  </data>
+  <data name="Edit_CopyMenuText" xml:space="preserve">
+    <value>_Copy</value>
+  </data>
+  <data name="Edit_CopyValueMenuText" xml:space="preserve">
+    <value>Copy _Value</value>
+  </data>
+  <data name="Edit_SearchLabel" xml:space="preserve">
+    <value>_Search:</value>
+  </data>
+  <data name="Edit_SearchNowAccessText" xml:space="preserve">
+    <value>_Search Now</value>
+  </data>
+  <data name="Edit_SearchSubtreeMenuText" xml:space="preserve">
+    <value>_Search Subtree...</value>
+  </data>
+  <data name="File_ExportMenuText" xml:space="preserve">
+    <value>E_xport...</value>
+  </data>
+  <data name="File_ExportTableDataMenuText" xml:space="preserve">
+    <value>_Export Table Data...</value>
+  </data>
+  <data name="File_ExportTableDataTitle" xml:space="preserve">
+    <value>Export Table Data</value>
+  </data>
+  <data name="File_OpenDitFileTitle" xml:space="preserve">
+    <value>Open DIT File</value>
+  </data>
+  <data name="File_OpenDitMenuText" xml:space="preserve">
+    <value>_Open DIT File...</value>
+  </data>
+  <data name="General_DescriptionColumnHeader" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="General_NameAccessText" xml:space="preserve">
+    <value>_Name:</value>
+  </data>
+  <data name="General_NameColumnHeader" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="General_ValueColumnHeader" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="IncludeSubclasses_Label" xml:space="preserve">
+    <value>Inc_lude subclasses</value>
+  </data>
+  <data name="MainMenu_FileMenuText" xml:space="preserve">
+    <value>_File</value>
+  </data>
+  <data name="MainMenu_ViewMenuText" xml:space="preserve">
+    <value>_View</value>
+  </data>
+  <data name="MainWindowTitle" xml:space="preserve">
+    <value>DIT Explorer</value>
+  </data>
+  <data name="ObjectClass_Label" xml:space="preserve">
+    <value>_Object class:</value>
+  </data>
+  <data name="ObjectInspector_Title" xml:space="preserve">
+    <value>Object Inspector</value>
+  </data>
+  <data name="Object_MemberOfAccessText" xml:space="preserve">
+    <value>Member _of</value>
+  </data>
+  <data name="Object_MembersAccessText" xml:space="preserve">
+    <value>_Members</value>
+  </data>
+  <data name="Object_PropertiesMenuText" xml:space="preserve">
+    <value>_Properties</value>
+  </data>
+  <data name="Schema_AttributeColumnHeader" xml:space="preserve">
+    <value>Attribute</value>
+  </data>
+  <data name="Schema_AttributesAccessText" xml:space="preserve">
+    <value>_Attributes</value>
+  </data>
+  <data name="Schema_ColumnsAccessText" xml:space="preserve">
+    <value>_Columns</value>
+  </data>
+  <data name="Schema_DBColumnColumnHeading" xml:space="preserve">
+    <value>Col. Name</value>
+  </data>
+  <data name="Schema_IndexesAccessText" xml:space="preserve">
+    <value>_Indexes</value>
+  </data>
+  <data name="Schema_LdapNameColumnHeader" xml:space="preserve">
+    <value>LDAP Name</value>
+  </data>
+  <data name="Schema_ObjClassColumnHeader" xml:space="preserve">
+    <value>Obj. Class</value>
+  </data>
+  <data name="Schema_ObjectPathColumnHeading" xml:space="preserve">
+    <value>Path</value>
+  </data>
+  <data name="Schema_PagesUsedColumnHeader" xml:space="preserve">
+    <value>Pages Used</value>
+  </data>
+  <data name="Schema_RecordCountColumnHeader" xml:space="preserve">
+    <value>Records</value>
+  </data>
+  <data name="Schema_TablesAccessText" xml:space="preserve">
+    <value>_Tables</value>
+  </data>
+  <data name="SubtreeSearch_Title" xml:space="preserve">
+    <value>Directory Search</value>
+  </data>
+  <data name="View_ColumnsMenuText" xml:space="preserve">
+    <value>_Columns...</value>
+  </data>
+  <data name="View_DatabaseSchema" xml:space="preserve">
+    <value>Database _Schema</value>
+  </data>
+</root>

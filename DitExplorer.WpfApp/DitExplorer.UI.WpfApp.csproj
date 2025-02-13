@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <BaseOutputPath>$(SolutionDir)_build\</BaseOutputPath>
+    <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
+	  
+	  <OutDir>$(BaseOutputPath)\$(Configuration)\</OutDir>
+	  
+	  <IsPublishable>False</IsPublishable>
+	    </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.ComponentModel.Composition" Version="9.0.2" />
+    <PackageReference Include="System.ComponentModel.Composition.Registration" Version="9.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DitExplorer.Core\DitExplorer.Core.csproj" />
+    <ProjectReference Include="..\DitExplorer.Extensibility\DitExplorer.Extensibility.csproj" />
+    <ProjectReference Include="..\DitExplorer.Ntds\DitExplorer.Ntds.csproj" />
+    <ProjectReference Include="..\DitExplorer.UI.Core\DitExplorer.UI.Core.csproj" />
+    <ProjectReference Include="..\DitExplorer.Utilities\DitExplorer.Utilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Messages.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Messages.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Messages.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Messages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Actions\" />
+    <Folder Include="Behaviors\" />
+    <Folder Include="Extensibility\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>

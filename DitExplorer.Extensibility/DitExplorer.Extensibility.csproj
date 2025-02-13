@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>DitExplorer</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DitExplorer.Core\DitExplorer.Core.csproj" />
+    <ProjectReference Include="..\DitExplorer.Ntds\DitExplorer.Ntds.csproj" />
+  </ItemGroup>
+
+</Project>

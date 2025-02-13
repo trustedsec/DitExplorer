@@ -1,0 +1,12 @@
+<Project>
+	<PropertyGroup>
+	  <Title>DIT Explorer</Title>
+	  <Company>TrustedSec</Company>
+	  <Authors>Alex Ball</Authors>
+	  <Product>DIT Explorer</Product>
+	  <Copyright>Copyright ©  2025</Copyright>
+	  
+	  <PackageProjectUrl>https://www.github.com/trustedsec/DitExplorer</PackageProjectUrl>
+	  <RepositoryUrl>https://www.github.com/trustedsec/DitExplorer</RepositoryUrl>
+	</PropertyGroup>
+</Project>

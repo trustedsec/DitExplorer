@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="DitExtensionManifest"
+    targetNamespace="xsd://DitExplorer/DitExtensionManifest.xsd"
+    elementFormDefault="qualified"
+    xmlns="xsd://DitExplorer/DitExtensionManifest.xsd"
+    xmlns:mstns="xsd://DitExplorer/DitExtensionManifest.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+
+	<xs:element name="manifest">
+		<xs:complexType>
+			<xs:attribute name="assemblyFileName" type="xs:string"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
