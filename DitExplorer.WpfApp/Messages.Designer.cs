@@ -169,6 +169,15 @@ namespace DitExplorer.UI.WpfApp {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The database was not shut down cleanly.  Recover or repair the database using esentutl /r or esentutl /p.  For more information on esentutl, see the documentation at https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/hh875546(v=ws.11)..
+        /// </summary>
+        public static string Error_DirtyShutdown {
+            get {
+                return ResourceManager.GetString("Error_DirtyShutdown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to E_xport....
         /// </summary>
         public static string File_ExportMenuText {

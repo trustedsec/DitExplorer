@@ -153,6 +153,9 @@
   <data name="Edit_SearchSubtreeMenuText" xml:space="preserve">
     <value>_Search Subtree...</value>
   </data>
+  <data name="Error_DirtyShutdown" xml:space="preserve">
+    <value>The database was not shut down cleanly.  Recover or repair the database using esentutl /r or esentutl /p.  For more information on esentutl, see the documentation at https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/hh875546(v=ws.11).</value>
+  </data>
   <data name="File_ExportMenuText" xml:space="preserve">
     <value>E_xport...</value>
   </data>

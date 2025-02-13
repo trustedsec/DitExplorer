@@ -1,5 +1,6 @@
 ﻿using DitExplorer.EseInterop;
 using DitExplorer.Ntds;
+using Microsoft.Isam.Esent.Interop;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -87,6 +88,10 @@ internal partial class AppViewModel : ViewModel
 				SelectedNode = node;
 
 				ListVM.OnDirectoryLoaded(dirView);
+			}
+			catch (EsentDatabaseDirtyShutdownException ex)
+			{
+				MessageBox.Show(this.Window, Messages.Error_DirtyShutdown, this.WindowTitle, MessageBoxButton.OK, MessageBoxImage.Error);
 			}
 			catch (Exception ex)
 			{
