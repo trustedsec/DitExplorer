@@ -79,6 +79,16 @@ public partial class JetCursor
 	/// Call this method (or another overload) to build a key before calling <see cref="Seek(SeekGrbit)"/> or
 	/// <see cref="SetIndexRange(SetIndexRangeGrbit)(string)"/>.
 	/// </remarks>
+	public void MakeKey(long value, MakeKeyGrbit options) => this.MakeKey(BitConverter.GetBytes(value), options);
+	/// <summary>
+	/// Constructs a key.
+	/// </summary>
+	/// <param name="value"></param>
+	/// <param name="options"></param>
+	/// <remarks>
+	/// Call this method (or another overload) to build a key before calling <see cref="Seek(SeekGrbit)"/> or
+	/// <see cref="SetIndexRange(SetIndexRangeGrbit)(string)"/>.
+	/// </remarks>
 	public void MakeKey(string value, MakeKeyGrbit options) => this.MakeKey(Encoding.Unicode.GetBytes(value), options);
 
 	/// <summary>
