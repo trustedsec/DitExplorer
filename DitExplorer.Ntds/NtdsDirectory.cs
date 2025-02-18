@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.DataContracts;
+using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
@@ -36,6 +37,18 @@ public partial class NtdsDirectory : IDirectory
 	/// </summary>
 	private const int NtdsPageSize = 8192;
 	private const string DataTableName = "datatable";
+	private const string NameIndex = "INDEX_00090001";
+	private const string DntIndexName = "DNT_index";
+	private const string ParentDntNameIndex = "PDNT_index";
+	private const string AncestorsIndex = "Ancestors_index";
+	private const string ObjectSidIndex = "INDEX_00090092";
+	private const string PrimaryGroupIdIndex = "INDEX_00090062";
+
+	private const string SdTableName = "sd_table";
+	private const string SdValueColName = "sd_value";
+	private const string SdIdIndexName = "sd_id_index";
+	private const string SdHashIndexName = "sd_hash_index";
+
 	private const string LinkTableName = "link_table";
 	private const string LinkIndexName = "link_index";
 	private const string BacklinkIndexName = "backlink_index";
@@ -49,7 +62,9 @@ public partial class NtdsDirectory : IDirectory
 	private readonly JetInstance instance;
 	private JetSession session;
 	private JetCursor _dntCursor;
+	private JetCursor _sdCursor;
 	private JET_COLUMNID[] linkTableColIds;
+	private JET_COLUMNID _sdValueColid;
 
 	/// <summary>
 	/// Gets the database underlying the directory.
@@ -136,12 +151,6 @@ public partial class NtdsDirectory : IDirectory
 		"ATTr589970",
 	};
 
-	private const string NameIndex = "INDEX_00090001";
-	private const string DntIndexName = "DNT_index";
-	private const string ParentDntNameIndex = "PDNT_index";
-	private const string AncestorsIndex = "Ancestors_index";
-	private const string ObjectSidIndex = "INDEX_00090092";
-	private const string PrimaryGroupIdIndex = "INDEX_00090062";
 	private const string ConfigurationName = "Configuration";
 	private const string SchemaName = "Schema";
 	/// <summary>
@@ -299,9 +308,18 @@ public partial class NtdsDirectory : IDirectory
 			this.linkTableColIds = linkTableCols;
 		}
 
-		var dntCursor = db.OpenTable(DataTableName);
-		dntCursor.SetIndex(DntIndexName);
-		this._dntCursor = dntCursor;
+		{
+			var dntCursor = db.OpenTable(DataTableName);
+			dntCursor.SetIndex(DntIndexName);
+			this._dntCursor = dntCursor;
+		}
+
+		{
+			var sdCursor = db.OpenTable(SdTableName);
+			sdCursor.SetIndex(SdIdIndexName);
+			this._sdValueColid = db.GetColumnId(SdTableName, SdValueColName);
+			this._sdCursor = sdCursor;
+		}
 
 		if (rootDN is not null)
 		{
@@ -530,12 +548,33 @@ public partial class NtdsDirectory : IDirectory
 		return oid;
 	}
 
+	private static string? DecodeBerOid(ReadOnlySpan<byte> ber)
+	{
+		if (ber.Length == 0)
+			return null;
+
+		StringBuilder sb = new StringBuilder(ber.Length * 3);
+		sb.Append(ber[0] / 40).Append('.').Append(ber[0] % 40);
+		for (int i = 1; i < ber.Length; i++)
+		{
+			sb.Append('.').Append(ber[i]);
+		}
+
+		return sb.ToString();
+	}
+
 
 
 	private AttributeSyntax[] _syntaxes;
 
 	record struct SyntaxKey(int oid, int omSyntax);
 	private Dictionary<SyntaxKey, AttributeSyntax> _syntaxesByKey;
+
+	// Special syntaxes
+	private AttributeSyntax _guidSyntax;
+	private AttributeSyntax _instanceTypeSyntax;
+	private AttributeSyntax _systemFlagsSyntax;
+	private AttributeSyntax _searchFlagsSyntax;
 
 	/// <summary>
 	/// Creates the attribute syntaxes used by attributes.
@@ -546,6 +585,11 @@ public partial class NtdsDirectory : IDirectory
 	private void LoadSyntaxes()
 	{
 		Func<JetCursor, JET_COLUMNID, int, object> readBytes = (csr, colid, tag) => csr.ReadBytes(colid, tag);
+		Func<JetCursor, JET_COLUMNID, int, object> readGuid = (csr, colid, tag) =>
+		{
+			var bytes = csr.ReadBytes(colid, tag);
+			return (bytes != null) ? new Guid(bytes) : null;
+		};
 		Func<JetCursor, JET_COLUMNID, int, object> readInt32 = (csr, colid, tag) => csr.ReadInt32(colid, tag);
 		Func<JetCursor, JET_COLUMNID, int, object> readInt64 = (csr, colid, tag) => csr.ReadInt64(colid, tag);
 		Func<JetCursor, JET_COLUMNID, int, object> readUtf16String = (csr, colid, tag) => csr.ReadUtf16String(colid, tag);
@@ -598,8 +642,13 @@ public partial class NtdsDirectory : IDirectory
 			new AttributeSyntax(typeof(DateTime), "String(UTC-Time)", "2.5.5.11", 0x80000 + 11, 23, null, readInt64, decodeUtcTime, writeInt64),
 			new AttributeSyntax(typeof(DateTime), "String(Generalized-Time)", "2.5.5.11", 0x80000 + 11, 24, null, readInt64, decodeGeneralTime, writeInt64),
 		};
-
 		this._syntaxes = syntaxes;
+
+		// Special syntaxes
+		this._guidSyntax = new AttributeSyntax(typeof(byte[]), "String(Guid)", "2.5.5.10", 0x80000 + 10, 4, null, readBytes, o => new Guid((byte[])o), writeBytes);
+		this._instanceTypeSyntax = new AttributeSyntax(typeof(ADInstanceType), "Enumeration(InstanceType)", "2.5.5.9", 0x80000 + 9, 2, null, readInt32, r => (ADInstanceType)(int)r, writeInt32);
+		this._systemFlagsSyntax = new AttributeSyntax(typeof(AttributeSystemFlags), "Enumeration(SystemFlags)", "2.5.5.9", 0x80000 + 9, 2, null, readInt32, r => (AttributeSystemFlags)(int)r, writeInt32);
+		this._searchFlagsSyntax = new AttributeSyntax(typeof(ADSearchFlags), "Enumeration(SearchFlags)", "2.5.5.9", 0x80000 + 9, 10, null, readInt32, r => (ADSearchFlags)(int)r, writeInt32);
 
 		Dictionary<SyntaxKey, AttributeSyntax> syntaxesByKey = new Dictionary<SyntaxKey, AttributeSyntax>();
 		foreach (var syntax in syntaxes)
@@ -623,8 +672,37 @@ public partial class NtdsDirectory : IDirectory
 
 	private object DecodeSD(byte[] r)
 	{
-		// TODO: Implement SD decoding
-		return r;
+		return TryGetSecurityDescriptor(r);
+	}
+
+	private object? TryGetSecurityDescriptor(long id)
+	{
+		var cur = this._sdCursor;
+		cur.MakeKey(id, MakeKeyGrbit.NewKey);
+		return TryGetSecurityDescriptorFromCursor(cur);
+	}
+
+	private object? TryGetSecurityDescriptor(byte[] id)
+	{
+		var cur = this._sdCursor;
+		cur.MakeKey(id, MakeKeyGrbit.NewKey);
+		return TryGetSecurityDescriptorFromCursor(cur);
+	}
+
+	private object? TryGetSecurityDescriptorFromCursor(JetCursor cur)
+	{
+		if (cur.Seek())
+		{
+			byte[] sdBytes = cur.ReadBytes(this._sdValueColid, 1);
+			if (sdBytes != null)
+			{
+				RawSecurityDescriptor sd = new RawSecurityDescriptor(sdBytes, 0);
+				string sddl = sd.GetSddlForm(AccessControlSections.All);
+				return sddl;
+			}
+		}
+
+		return null;
 	}
 
 	/// <summary>
@@ -872,10 +950,7 @@ public partial class NtdsDirectory : IDirectory
 
 			char typeChar = (char)('b' + (attr.AttributeSyntaxIdPrefixEncoded - 524289));
 
-			if (this._syntaxesByKey.TryGetValue(new SyntaxKey(attr.AttributeSyntaxIdPrefixEncoded, attr.OmSyntax), out var syntax))
-			{
-				attr.Syntax = syntax;
-			}
+			attr.Syntax = GetSyntaxFor(attr);
 
 			try
 			{
@@ -894,6 +969,35 @@ public partial class NtdsDirectory : IDirectory
 		}
 
 		return obj;
+	}
+
+	private AttributeSyntax? GetSyntaxFor(NtdsAttributeSchema attr)
+	{
+		const int ObjectGuidId = 589826;
+		const int InstanceTypeId = 131073;
+		const int SystemFlagsId = 590199;
+		const int SearchFlagsId = 131406;
+		const int SchemaGuidId = 589972;
+		const int AttributeSecurityGuidId = 589973;
+		const int secdescId = 131353;
+		if (attr.AttributeIdRaw == ObjectGuidId)
+			return this._guidSyntax;
+		else if (attr.AttributeIdRaw == InstanceTypeId)
+			return this._instanceTypeSyntax;
+		else if (attr.AttributeIdRaw == SystemFlagsId)
+			return this._systemFlagsSyntax;
+		else if (attr.AttributeIdRaw == SearchFlagsId)
+			return this._searchFlagsSyntax;
+		else if (attr.AttributeIdRaw == SchemaGuidId)
+			return this._guidSyntax;
+		else if (attr.AttributeIdRaw == AttributeSecurityGuidId)
+			return this._guidSyntax;
+
+		else if (this._syntaxesByKey.TryGetValue(new SyntaxKey(attr.AttributeSyntaxIdPrefixEncoded, attr.OmSyntax), out var syntax))
+		{
+			return syntax;
+		}
+		return null;
 	}
 	#endregion
 
@@ -1244,7 +1348,7 @@ public partial class NtdsDirectory : IDirectory
 			if (sidBytes == null || sidBytes.Length == 0)
 				return Array.Empty<IDirectoryObject>();
 
-			BinaryPrimitives.WriteInt32BigEndian(new Span<byte>(sidBytes).Slice(sidBytes.Length-4), groupId.Value);
+			BinaryPrimitives.WriteInt32BigEndian(new Span<byte>(sidBytes).Slice(sidBytes.Length - 4), groupId.Value);
 
 			using (var cur = this.Database.OpenTable(DataTableName))
 			{
@@ -1305,6 +1409,7 @@ partial class NtdsDirectory : IDisposable
 			if (disposing)
 			{
 				this._dntCursor?.Dispose();
+				this._sdCursor?.Dispose();
 				this.Database?.Dispose();
 				this.session?.Dispose();
 				this.instance?.Dispose();
