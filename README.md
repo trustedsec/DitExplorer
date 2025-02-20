@@ -3,7 +3,7 @@ DIT Explorer is a Windows application written in C# for browsing a NTDS.dit file
 Created in Visual Studio 2022.
 
 I wrote this as a tool for researching the structure of NTDS.dit. For more
-information, see my blog post at (coming soon)
+information, see my [blog post](https://trustedsec.com/blog/exploring-ntds-dit-part-1-cracking-the-surface-with-dit-explorer).
 
 ![image](https://github.com/user-attachments/assets/8efd1f31-8d2d-4adc-9832-4b33c68b5dea)
 
