@@ -5,8 +5,10 @@
 	  <Authors>Alex Ball</Authors>
 	  <Product>DIT Explorer</Product>
 	  <Copyright>Copyright ©  2025</Copyright>
-	  
-	  <PackageProjectUrl>https://www.github.com/trustedsec/DitExplorer</PackageProjectUrl>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+		<FileVersion>1.0.0.0</FileVersion>
+
+		<PackageProjectUrl>https://www.github.com/trustedsec/DitExplorer</PackageProjectUrl>
 	  <RepositoryUrl>https://www.github.com/trustedsec/DitExplorer</RepositoryUrl>
 	</PropertyGroup>
 </Project>
