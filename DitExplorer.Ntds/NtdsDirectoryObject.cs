@@ -38,6 +38,12 @@ public class NtdsDirectoryObject : IDirectoryObject
 	/// <inheritdoc/>
 	public override string ToString() => this.DistinguishedName;
 
+	public sealed override int GetHashCode() => HashCode.Combine(this.Dnt, this.Directory);
+	public sealed override bool Equals(object? obj)
+		=> (obj is NtdsDirectoryObject other)
+			&& (other.Directory == this.Directory)
+			&& (other.Dnt == this.Dnt);
+
 	internal string GetRdnTypeToken()
 		=> ((this._rdnAttrId != 0) ? this.Directory.TryGetAttributeById(this._rdnAttrId) : null)
 		?.RdnToken ?? "CN";
@@ -47,17 +53,15 @@ public class NtdsDirectoryObject : IDirectoryObject
 	/// Gets the distinguished name of the object.
 	/// </summary>
 	public string DistinguishedName => (this._dn ??= this.BuildDN());
-	private static string EscapeRdn(string rdn)
-		=> rdn.Replace("\r", @"\r")
-		.Replace("\n", @"\n")
-		.Replace(",", @"\,");
+	private static string EscapeDn(string text)
+		=> DitExplorer.DistinguishedName.Escape(text);
 	private string BuildDN()
 	{
 		StringBuilder sb = new StringBuilder();
 
-		sb.Append(this.GetRdnTypeToken())
+		sb.Append(EscapeDn(this.GetRdnTypeToken()))
 			.Append('=')
-			.Append(EscapeRdn(this.Name));
+			.Append(EscapeDn(this.Name));
 
 		for (int i = this._ancestryDnts.Length - 1; i >= 0; i--)
 		{
@@ -69,9 +73,9 @@ public class NtdsDirectoryObject : IDirectoryObject
 			var ancestor = this.Directory.GetByDnt(ancestorDnt);
 
 			sb.Append(',')
-				.Append(ancestor.GetRdnTypeToken())
+				.Append(EscapeDn(ancestor.GetRdnTypeToken()))
 				.Append('=')
-				.Append(EscapeRdn(ancestor.Name));
+				.Append(EscapeDn(ancestor.Name));
 		}
 
 		return sb.ToString();
@@ -105,7 +109,7 @@ public class NtdsDirectoryObject : IDirectoryObject
 	/// <summary>
 	/// Gets the object class schema.
 	/// </summary>
-	public NtdsClassSchema ObjectClass => _objClass ??= Directory.GetClassByGovernsId(_objClassGovernsId);
+	public NtdsClassSchema ObjectClass => (_objClassGovernsId != 0) ? _objClass ??= Directory.GetClassByGovernsId(_objClassGovernsId) : null;
 	/// <inheritdoc/>
 	IClassSchema IDirectoryObject.ObjectClass => this.ObjectClass;
 
@@ -187,7 +191,7 @@ public class NtdsDirectoryObject : IDirectoryObject
 		return this.Directory.GetAttributeValueFor(this, attribute, tag, decode);
 	}
 	object? IDirectoryObject.GetValueOf(DitExplorer.IAttributeSchema attribute)
-		=> this.GetValueOf(ArgumentHelper.ThrowIfNot<NtdsAttributeSchema>(attribute), 1);
+		=> this.GetValueOf((attribute is null) ? throw new ArgumentNullException(nameof(attribute)) : ArgumentHelper.ThrowIfNot<NtdsAttributeSchema>(attribute), 1);
 
 	/// <summary>
 	/// Gets all values of a multi-valued attribute.
@@ -230,10 +234,16 @@ public class NtdsDirectoryObject : IDirectoryObject
 	{
 		return this.Directory.SearchSubtree(this, searchName, objectClass, includeSubclasses);
 	}
+
 	IEnumerable<IDirectoryObject> IDirectoryObject.SearchSubtree(string? searchName)
 		=> this.SearchSubtree(searchName);
 	IEnumerable<IDirectoryObject> IDirectoryObject.SearchSubtree(string? searchName, IClassSchema? objectClass, bool includeSubclasses)
 		=> this.SearchSubtree(searchName, ArgumentHelper.ThrowIfNotNullAndNot<NtdsClassSchema>(objectClass), includeSubclasses);
+	public IEnumerable<IDirectoryObject> SearchSubtree(DirectoryQuery query)
+	{
+		if (query is null) throw new ArgumentNullException(nameof(query));
+		return this.Directory.SearchSubtree(this, query);
+	}
 
 	public bool IsInstanceOf(NtdsClassSchema classSchema)
 	{

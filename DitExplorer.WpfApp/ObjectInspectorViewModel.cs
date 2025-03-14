@@ -37,13 +37,13 @@ internal partial class ObjectInspectorViewModel : ViewModel
 				for (int j = 0; j < multi.Count; j++)
 				{
 					var element = multi.GetElementAt(j);
-					var item = new PropertyItem(attr.Name, j + 1, element) { LdapName = attr.LdapDisplayName, ColumnName = ntdsAttr?.ColumnName };
+					var item = new PropertyItem(attr, attr.Name, j + 1, element) { LdapName = attr.LdapDisplayName, ColumnName = ntdsAttr?.ColumnName };
 					propertyItems.Add(item);
 				}
 			}
 			else if (value != null)
 			{
-				var item = new PropertyItem(attr.Name, 1, value) { LdapName = attr.LdapDisplayName, ColumnName = ntdsAttr?.ColumnName };
+				var item = new PropertyItem(attr, attr.Name, 1, value) { LdapName = attr.LdapDisplayName, ColumnName = ntdsAttr?.ColumnName };
 				propertyItems.Add(item);
 			}
 		}
@@ -51,12 +51,12 @@ internal partial class ObjectInspectorViewModel : ViewModel
 		this._allProps = propertyItems;
 		this.Properties = propertyItems;
 
-		this.HasMembers = obj.ObjectClass.HasAttribute("member");
+		this.HasMembers = obj.ObjectClass?.HasAttribute("member") ?? false;
 		if (this.HasMembers)
 		{
 			this.MembersListVM = new DirectoryListViewModel(itemActionRegistry, this._dirView);
 		}
-		this.HasMemberOf = obj.ObjectClass.HasAttribute("memberOf");
+		this.HasMemberOf = obj.ObjectClass?.HasAttribute("memberOf") ?? false;
 		if (this.HasMemberOf)
 		{
 			this.MemberOfListVM = new DirectoryListViewModel(itemActionRegistry, this._dirView);
@@ -109,13 +109,15 @@ internal partial class ObjectInspectorViewModel : ViewModel
 
 	internal class PropertyItem
 	{
-		public PropertyItem(string name, int seq, object? value)
+		public PropertyItem(IAttributeSchema attribute, string name, int seq, object? value)
 		{
+			Attribute = attribute;
 			Name = name;
 			Seq = seq;
 			Value = value;
 		}
 
+		public IAttributeSchema Attribute { get; }
 		public string Name { get; }
 		internal NameSortKey NameSortKey => new NameSortKey(this.Name, this.Seq);
 		public int Seq { get; }
@@ -179,6 +181,14 @@ internal partial class ObjectInspectorViewModel : IContextCommandProvider
 		{
 			// CopyItems
 			menu.Items.Add(new MenuItem() { Header = Messages.Edit_CopyItemsMenuText, Command = MyCommands.CopySelection, CommandParameter = lvw, CommandTarget = lvw });
+			// CopyValue
+			menu.Items.Add(new MenuItem() { Header = Messages.Edit_CopyValueMenuText, Command = MyCommands.CopyValue, CommandParameter = source, CommandTarget = lvw });
+
+			if (context.Items.Length > 0 && context.Items[0] is PropertyItem propertyItem)
+			{
+				menu.Items.Add(new Separator());
+				menu.Items.Add(new MenuItem() { Header = Messages.Help_AdSchemaDocMenuText, Command = MyCommands.ShowAdSchemaDocHelp, CommandParameter = propertyItem.Attribute, CommandTarget = lvw });
+			}
 		}
 	}
 }

@@ -23,6 +23,7 @@ public class NtdsAttributeSchema : NtdsSchemaObject, IAttributeSchema
 	/// For more information on how attributes are encoded, see <see href="https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-drsr/6f53317f-2263-48ee-86c1-4580bf97232c">the documentation</see>.
 	/// </remarks>
 	public int AttributeIdRaw { get; internal set; }
+	internal override int RawId => this.AttributeIdRaw;
 
 	private string? _rdnToken;
 	/// <summary>
@@ -58,7 +59,7 @@ public class NtdsAttributeSchema : NtdsSchemaObject, IAttributeSchema
 	/// <remarks>
 	/// The syntax of the attribute determines how the value is encoded.
 	/// </remarks>
-	public AttributeSyntax Syntax { get; internal set; }
+	internal AttributeSyntax Syntax { get; set; }
 	/// <inheritdoc/>
 	IAttributeSyntax IAttributeSchema.Syntax => this.Syntax;
 

@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Action_ExportSubtreeXmlMenuText" xml:space="preserve">
+    <value>E_xport Subtree as XML...</value>
+  </data>
   <data name="App_Cancel" xml:space="preserve">
     <value>_Cancel</value>
   </data>
@@ -156,6 +159,9 @@
   <data name="Error_DirtyShutdown" xml:space="preserve">
     <value>The database was not shut down cleanly.  Recover or repair the database using esentutl /r or esentutl /p.  For more information on esentutl, see the documentation at https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/hh875546(v=ws.11).</value>
   </data>
+  <data name="Export_SubtreeXmlDialogTitle" xml:space="preserve">
+    <value>Export Subtree XML</value>
+  </data>
   <data name="File_ExportMenuText" xml:space="preserve">
     <value>E_xport...</value>
   </data>
@@ -171,6 +177,60 @@
   <data name="File_OpenDitMenuText" xml:space="preserve">
     <value>_Open DIT File...</value>
   </data>
+  <data name="Format_Binary" xml:space="preserve">
+    <value>Binary</value>
+  </data>
+  <data name="Format_Decimal" xml:space="preserve">
+    <value>Decimal</value>
+  </data>
+  <data name="Format_Flags" xml:space="preserve">
+    <value>Flags</value>
+  </data>
+  <data name="Format_General" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="Format_Hexadecimal" xml:space="preserve">
+    <value>Hexadecimal</value>
+  </data>
+  <data name="Format_LongDate" xml:space="preserve">
+    <value>Long Date</value>
+  </data>
+  <data name="Format_LongDateTime" xml:space="preserve">
+    <value>Long Date/Time</value>
+  </data>
+  <data name="Format_LongTime" xml:space="preserve">
+    <value>Long Time</value>
+  </data>
+  <data name="Format_MonthDay" xml:space="preserve">
+    <value>Month/Day</value>
+  </data>
+  <data name="Format_Rfc1123" xml:space="preserve">
+    <value>RFC 1123</value>
+  </data>
+  <data name="Format_Roundtrip" xml:space="preserve">
+    <value>Roundtrip</value>
+  </data>
+  <data name="Format_ShortDate" xml:space="preserve">
+    <value>Short Date</value>
+  </data>
+  <data name="Format_ShortDateTime" xml:space="preserve">
+    <value>Short Date/Time</value>
+  </data>
+  <data name="Format_ShortTime" xml:space="preserve">
+    <value>Short Time</value>
+  </data>
+  <data name="Format_Sortable" xml:space="preserve">
+    <value>Sortable</value>
+  </data>
+  <data name="Format_TicksDecimal" xml:space="preserve">
+    <value>Ticks (decimal)</value>
+  </data>
+  <data name="Format_TicksHex" xml:space="preserve">
+    <value>Ticks (hexadecimal)</value>
+  </data>
+  <data name="Format_YearMonth" xml:space="preserve">
+    <value>Year/Month</value>
+  </data>
   <data name="General_DescriptionColumnHeader" xml:space="preserve">
     <value>Description</value>
   </data>
@@ -183,17 +243,26 @@
   <data name="General_ValueColumnHeader" xml:space="preserve">
     <value>Value</value>
   </data>
+  <data name="Help_AdSchemaDocMenuText" xml:space="preserve">
+    <value>Active Directory Schema Documentation</value>
+  </data>
   <data name="IncludeSubclasses_Label" xml:space="preserve">
     <value>Inc_lude subclasses</value>
   </data>
   <data name="MainMenu_FileMenuText" xml:space="preserve">
     <value>_File</value>
   </data>
+  <data name="MainMenu_HelpMenuText" xml:space="preserve">
+    <value>_Help</value>
+  </data>
   <data name="MainMenu_ViewMenuText" xml:space="preserve">
     <value>_View</value>
   </data>
   <data name="MainWindowTitle" xml:space="preserve">
     <value>DIT Explorer</value>
+  </data>
+  <data name="NonePlaceholder" xml:space="preserve">
+    <value>&lt;none&gt;</value>
   </data>
   <data name="ObjectClass_Label" xml:space="preserve">
     <value>_Object class:</value>
@@ -243,6 +312,21 @@
   <data name="Schema_TablesAccessText" xml:space="preserve">
     <value>_Tables</value>
   </data>
+  <data name="Search_ByAttributeCaption" xml:space="preserve">
+    <value>By _Attribute</value>
+  </data>
+  <data name="Search_ByGuidCaption" xml:space="preserve">
+    <value>By _GUID</value>
+  </data>
+  <data name="Search_ByLdapQuery" xml:space="preserve">
+    <value>By _LDAP Query</value>
+  </data>
+  <data name="Search_ByNameAccessText" xml:space="preserve">
+    <value>By _Name</value>
+  </data>
+  <data name="Search_BySidCaption" xml:space="preserve">
+    <value>By _SID</value>
+  </data>
   <data name="SubtreeSearch_Title" xml:space="preserve">
     <value>Directory Search</value>
   </data>
@@ -251,5 +335,8 @@
   </data>
   <data name="View_DatabaseSchema" xml:space="preserve">
     <value>Database _Schema</value>
+  </data>
+  <data name="View_DisplayFormatMenuText" xml:space="preserve">
+    <value>Display _Format</value>
   </data>
 </root>

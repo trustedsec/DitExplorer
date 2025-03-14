@@ -42,6 +42,7 @@ public partial class NtdsDirectory : IDirectory
 	private const string ParentDntNameIndex = "PDNT_index";
 	private const string AncestorsIndex = "Ancestors_index";
 	private const string ObjectSidIndex = "INDEX_00090092";
+	private const string GuidIndexName = "INDEX_00090002";
 	private const string PrimaryGroupIdIndex = "INDEX_00090062";
 
 	private const string SdTableName = "sd_table";
@@ -58,6 +59,9 @@ public partial class NtdsDirectory : IDirectory
 		"link_base",
 		"link_DNT",
 	};
+
+	private const int DomainGovernsId = 655427;
+	private const string ObjectClassIndex = "INDEX_00000000";
 
 	private readonly JetInstance instance;
 	private JetSession session;
@@ -333,36 +337,57 @@ public partial class NtdsDirectory : IDirectory
 		}
 		else
 		{
+			NtdsDirectoryObject? rootDomainObj = null;
+			using (var cur = this.Database.OpenTable(DataTableName))
+			{
+				cur.SetIndex(ObjectClassIndex);
+				cur.MakeKey(DomainGovernsId, MakeKeyGrbit.NewKey);
+				cur.Seek(SeekGrbit.SeekEQ);
+				cur.MakeKey(DomainGovernsId, MakeKeyGrbit.NewKey);
+				cur.SetIndexRange(SetIndexRangeGrbit.RangeInclusive | SetIndexRangeGrbit.RangeUpperLimit);
+
+				while (cur.HasCurrentRecord)
+				{
+					var obj = this.GetObjectFromRecord(cur);
+					rootDomainObj = obj;
+					break;
+
+					cur.MoveNext();
+				}
+			}
+
 			// No root domain provided, try to detect the root domain
 			// Start at the root of the database and return the first NC head
 			var rootObj = this.GetChildrenOf(0).FirstOrDefault();
-			NtdsDirectoryObject? rootDomainObj = null;
-			if (rootObj != null)
-			{
-				int dnt = rootObj.Dnt;
-				do
-				{
-					bool foundChild = false;
-					foreach (var obj in this.GetChildrenOf(dnt))
-					{
-						// Skip deleted objects
-						if (obj.IsDeleted)
-							continue;
+			this.RootObject = rootObj;
+			//if (rootObj != null)
+			//{
+			//	int dnt = rootObj.Dnt;
+			//	do
+			//	{
+			//		bool foundChild = false;
+			//		foreach (var obj in this.GetChildrenOf(dnt))
+			//		{
+			//			// Skip deleted objects
+			//			if (obj.IsDeleted)
+			//				continue;
 
-						foundChild = true;
-						if (obj.IsNCHead)
-							// NC head, assume it's the root domain
-							rootDomainObj = obj;
-						else
-							// Nope, keep going
-							dnt = obj.Dnt;
+			//			foundChild = true;
+			//			if (obj.IsNCHead)
+			//			{
+			//				// NC head, assume it's the root domain
+			//				rootObj = obj;
+			//			}
+			//			else
+			//				// Nope, keep going
+			//				dnt = obj.Dnt;
 
-						break;
-					}
-					if (!foundChild)
-						break;
-				} while (rootDomainObj == null);
-			}
+			//			break;
+			//		}
+			//		if (!foundChild)
+			//			break;
+			//	} while (rootDomainObj == null);
+			//}
 
 			if (rootDomainObj == null)
 				throw new Exception(Messages.Directory_NoRootFound);
@@ -394,8 +419,19 @@ public partial class NtdsDirectory : IDirectory
 		Dictionary<int, NtdsAttributeSchema> attrsById = new Dictionary<int, NtdsAttributeSchema>();
 		Dictionary<string, NtdsAttributeSchema> attrsByLdapDisplayName = new Dictionary<string, NtdsAttributeSchema>(StringComparer.OrdinalIgnoreCase);
 
-		var schemaObj = this.RootDomain.GetChild(ConfigurationName).GetChild(SchemaName);
-		foreach (var item in schemaObj.GetChildren())
+		const int ConfGovernsId = 655372;
+		const int SchemaGovernsId = 196617;
+		NtdsDirectoryObject schemaContainer;
+		using (var cursor = this.Database.OpenTable(DataTableName))
+		{
+			cursor.SetIndex(ObjectClassIndex);
+			cursor.MakeKey(SchemaGovernsId, MakeKeyGrbit.NewKey);
+			if (!cursor.Seek(SeekGrbit.SeekEQ))
+				throw new InvalidDataException(Messages.Error_SchemaContainerNotFound);
+			schemaContainer = this.GetObjectFromRecord(cursor);
+		}
+
+		foreach (var item in schemaContainer.GetChildren())
 		{
 			if (item is NtdsClassSchema objcls)
 			{
@@ -469,19 +505,20 @@ public partial class NtdsDirectory : IDirectory
 	/// </remarks>
 	private static readonly string[] OidPrefixes = new string[]
 	{
+
 		// 0
 		"2.5.4",
 		"2.5.6",
-		"1.2.134.72.134.247.20.1.2",
-		"1.2.134.72.134.247.20.1.3",
-		"2.16.134.72.1.101.2.2.1",
-		"2.16.134.72.1.101.2.2.3",
-		"2.16.134.72.1.101.2.1.5",
-		"2.16.134.72.1.101.2.1.4",
+		"1.2.840.113556.1.2",
+		"1.2.840.113556.1.3",
+		"2.16.840.1.101.2.2.1",
+		"2.16.840.1.101.2.2.3",
+		"2.16.840.1.101.2.1.5",
+		"2.16.840.1.101.2.1.4",
 		"2.5.5",
-		"1.2.134.72.134.247.20.1.4",
+		"1.2.840.113556.1.4",
 		// 10
-		"1.2.134.72.134.247.20.1.5",
+		"1.2.840.113556.1.5",
 		null,
 		null,
 		null,
@@ -490,12 +527,12 @@ public partial class NtdsDirectory : IDirectory
 		null,
 		null,
 		null,
-		"0.9.146.38.137.147.242.44.100",
+		"0.9.2342.19200300.100",
 		// 20
-		"2.16.134.72.1.134.248.66.3",
-		"0.9.146.38.137.147.242.44.100.1",
-		"2.16.134.72.1.134.248.66.3.1",
-		"1.2.134.72.134.247.20.1.5.182.88",
+		"2.16.840.1.113730.3",
+		"0.9.2342.19200300.100.1",
+		"2.16.840.1.113730.3.1",
+		"1.2.840.113556.1.5.7000",
 		"2.5.21",
 		"2.5.18",
 		"2.5.20",
@@ -518,7 +555,7 @@ public partial class NtdsDirectory : IDirectory
 	/// </summary>
 	/// <param name="encoded">Prefix-encoded OID</param>
 	/// <returns></returns>
-	private static string DecodePrefixedOid(int encoded)
+	internal string DecodePrefixedOid(int encoded)
 	{
 		var prefixId = (encoded >> 16);
 		string prefix;
@@ -548,6 +585,21 @@ public partial class NtdsDirectory : IDirectory
 		return oid;
 	}
 
+	internal int EncodeOid(string oid)
+	{
+		if (string.IsNullOrEmpty(oid)) throw new ArgumentException($"'{nameof(oid)}' cannot be null or empty.", nameof(oid));
+		int sep = oid.LastIndexOf('.');
+		if (sep == -1)
+			throw new ArgumentException("The string is not a valid OID.", nameof(oid));
+
+		string prefix = oid.Substring(0, sep);
+		int index = Array.IndexOf(OidPrefixes, prefix);
+		if (index == -1)
+			throw new ArgumentException("The OID prefix is not recognized.", nameof(oid));
+
+		return (index << 16) | int.Parse(oid.AsSpan().Slice(sep + 1));
+	}
+
 	private static string? DecodeBerOid(ReadOnlySpan<byte> ber)
 	{
 		if (ber.Length == 0)
@@ -575,6 +627,14 @@ public partial class NtdsDirectory : IDirectory
 	private AttributeSyntax _instanceTypeSyntax;
 	private AttributeSyntax _systemFlagsSyntax;
 	private AttributeSyntax _searchFlagsSyntax;
+	private AttributeSyntax _schemaFlagsExSyntax;
+	private AttributeSyntax _groupTypeSyntax;
+	private AttributeSyntax _uacSyntax;
+	private AttributeSyntax _samAccountTypeSyntax;
+	private AttributeSyntax _utcTimeSyntax;
+	private AttributeSyntax _fileTimeSyntax;
+	private AttributeSyntax _localTimeSyntax;
+	private AttributeSyntax _int64TimeSyntax;
 
 	/// <summary>
 	/// Creates the attribute syntaxes used by attributes.
@@ -584,71 +644,53 @@ public partial class NtdsDirectory : IDirectory
 	/// </remarks>
 	private void LoadSyntaxes()
 	{
-		Func<JetCursor, JET_COLUMNID, int, object> readBytes = (csr, colid, tag) => csr.ReadBytes(colid, tag);
-		Func<JetCursor, JET_COLUMNID, int, object> readGuid = (csr, colid, tag) =>
-		{
-			var bytes = csr.ReadBytes(colid, tag);
-			return (bytes != null) ? new Guid(bytes) : null;
-		};
-		Func<JetCursor, JET_COLUMNID, int, object> readInt32 = (csr, colid, tag) => csr.ReadInt32(colid, tag);
-		Func<JetCursor, JET_COLUMNID, int, object> readInt64 = (csr, colid, tag) => csr.ReadInt64(colid, tag);
-		Func<JetCursor, JET_COLUMNID, int, object> readUtf16String = (csr, colid, tag) => csr.ReadUtf16String(colid, tag);
-
-		Action<JetCursor, JET_COLUMNID, int, object> writeBytes = (csr, colid, tag, value) => csr.SetColumnBytes(colid, tag, (byte[])value);
-		Action<JetCursor, JET_COLUMNID, int, object> writeInt32 = (csr, colid, tag, value) => csr.SetInt32(colid, tag, (int)value);
-		Action<JetCursor, JET_COLUMNID, int, object> writeInt64 = (csr, colid, tag, value) => csr.SetInt64(colid, tag, (long)value);
-		Action<JetCursor, JET_COLUMNID, int, object> writeUtf16String = (csr, colid, tag, value) => csr.SetUtf16String(colid, tag, ((string)value) + '\0');
-
-		Func<object, object> decodeBoolean = r => ((int)r) != 0;
-		Func<object, object> decodeAnsiString = r => Encoding.UTF8.GetString((byte[])r);
-		Func<object, object> decodeUtcTime = r => DateTime.FromFileTimeUtc(((long)r) * 10_000_000);
-		Func<object, object> decodeGeneralTime = r => DateTime.FromFileTime(((long)r) * 10_000_000);
-		Func<object, object> decodeSid = r => ParseDirectorySid(r);
-		Func<object, object> decodeSD = r => DecodeSD((byte[])r);
-		Func<object, object> decodeOid = r => DecodePrefixedOid((int)r);
-		Func<object, object> resolveDnt = r => this.GetByDnt((int)r);
-
 		// TODO: In general, verify attribute decoding and fill out this table
-
 		var syntaxes = new AttributeSyntax[]
 		{
-			new AttributeSyntax(typeof(bool), "Boolean", "2.5.5.8", 0x80000 + 8, 1, null, readInt32, decodeBoolean, writeInt32),
-			new AttributeSyntax(typeof(int), "Enumeration", "2.5.5.9", 0x80000 + 9, 10, null, readInt32, null, writeInt32),
-			new AttributeSyntax(typeof(int), "Integer", "2.5.5.9", 0x80000 + 9, 2, null, readInt32, null, writeInt32),
-			new AttributeSyntax(typeof(long), "LargeInteger", "2.5.5.16", 0x80000 + 16, 64, null, readInt64, null, writeInt64),
+			new BoolAttributeSyntax(new AttrSyntaxInfo("Boolean", "2.5.5.8", 0x80000 + 8, 1)),
+			new Int32AttributeSyntax(new AttrSyntaxInfo("Enumeration", "2.5.5.9", 0x80000 + 9, 10)),
+			new Int32AttributeSyntax(new AttrSyntaxInfo("Integer", "2.5.5.9", 0x80000 + 9, 2)),
+			this._int64TimeSyntax = new Int64AttributeSyntax(new AttrSyntaxInfo("LargeInteger", "2.5.5.16", 0x80000 + 16, 65)),
 			// TODO: No examples found, could be UTF-16 string or binary
 			//new AttributeSyntax("Object(Access-Point)", "2.5.5.14", 0x80000 + 14, 127, "1.3.12.2.1011.28.0.702", null, null),
 			// TODO: No examples found, could be UTF-16 string or binary
-			new AttributeSyntax(null, "Object(DN-String)", "2.5.5.14", 0x80000 + 14, 127, "1.2.840.113556.1.1.1.12", null, null, null),
+			new BinaryAttributeSyntax(new AttrSyntaxInfo("Object(DN-String)", "2.5.5.14", 0x80000 + 14, 127, "1.2.840.113556.1.1.1.12")),
 			//new AttributeSyntax("Object(OR-Name)", "2.5.5.7", 0x80000 + 7, 127, "2.6.6.1.2.5.11.29", readBytes, null),
+			new ObjRefAttributeSyntax(new AttrSyntaxInfo("Object(DN-Binary)", "2.5.5.7", 0x80000 + 7, 127, "1.2.840.113556.1.1.1.11"), this),
 			// TODO: Decoder
-			new AttributeSyntax(typeof(byte[]), "Object(DN-Binary)", "2.5.5.7", 0x80000 + 7, 127, "1.2.840.113556.1.1.1.11", readBytes, null, writeBytes),
-			new AttributeSyntax(typeof(NtdsDirectoryObject), "Object(DS-DN)", "2.5.5.1", 0x80000 + 1, 127, "1.3.12.2.1011.28.0.714", readInt32, resolveDnt, writeInt32),
-			new AttributeSyntax(typeof(string), "Object(Presentation-Address)", "2.5.5.13", 0x80000 + 13, 127, "1.3.12.2.1011.28.0.732", readUtf16String, null, writeUtf16String),
-			new AttributeSyntax(null, "Object(Replica-Link)", "2.5.5.10", 0x80000 + 10, 127, "1.2.840.113556.1.1.1.", readBytes, null, writeBytes),
+			new DntAttributeSyntax(new AttrSyntaxInfo("Object(DS-DN)", "2.5.5.1", 0x80000 + 1, 127, "1.3.12.2.1011.28.0.714"), this),
+			new BinaryAttributeSyntax(new AttrSyntaxInfo("Object(Presentation-Address)", "2.5.5.13", 0x80000 + 13, 127, "1.3.12.2.1011.28.0.732")),
+			new BinaryAttributeSyntax(new AttrSyntaxInfo( "Object(Replica-Link)", "2.5.5.10", 0x80000 + 10, 127, "1.2.840.113556.1.1.1.")),
 			// TODO: Just a guess, could not find any examples
-			new AttributeSyntax(typeof(string), "String(Case)", "2.5.5.3", 0x80000 + 3, 27, null, readUtf16String, null, writeUtf16String),
+			new Utf16StringAttributeSyntax(new AttrSyntaxInfo("String(Case)", "2.5.5.3", 0x80000 + 3, 27)),
 			// TODO: Verify
-			new AttributeSyntax(typeof(string), "String(IA5)", "2.5.5.5", 0x80000 + 5, 22, null, readBytes, decodeAnsiString, writeBytes),
+			new AsciiStringAttributeSyntax(new AttrSyntaxInfo( "String(IA5)", "2.5.5.5", 0x80000 + 5, 22)),
 			// TODO: Update return type once SD decoding is supported
-			new AttributeSyntax(typeof(string), "String(NT-Sec-Desc)", "2.5.5.15", 0x80000 + 15, 66, null, readBytes, decodeSD, writeBytes),
-			new AttributeSyntax(typeof(byte[]), "String(Numeric)", "2.5.5.6", 0x80000 + 6, 18, null, readBytes, null, writeBytes),
-			new AttributeSyntax(typeof(string), "String(Object-Identifier)", "2.5.5.2", 0x80000 + 2, 6, null, readInt32, decodeOid, writeInt32),
-			new AttributeSyntax(typeof(byte[]), "String(Octet)", "2.5.5.10", 0x80000 + 10, 4, null, readBytes,null, writeBytes),
-			new AttributeSyntax(typeof(byte[]), "String(Printable)", "2.5.5.5", 0x80000 + 5, 19, null, readBytes, null, writeBytes),
-			new AttributeSyntax(typeof(SecurityIdentifier), "String(Sid)", "2.5.5.17", 0x80000 + 17, 4, null, readBytes, decodeSid, writeBytes),
-			new AttributeSyntax(typeof(string), "String(Teletex)", "2.5.5.4", 0x80000 + 4, 20, null, readUtf16String, null, writeUtf16String),
-			new AttributeSyntax(typeof(string), "String(Unicode)", "2.5.5.12", 0x80000 + 12, 64, null, readUtf16String, null, writeUtf16String),
-			new AttributeSyntax(typeof(DateTime), "String(UTC-Time)", "2.5.5.11", 0x80000 + 11, 23, null, readInt64, decodeUtcTime, writeInt64),
-			new AttributeSyntax(typeof(DateTime), "String(Generalized-Time)", "2.5.5.11", 0x80000 + 11, 24, null, readInt64, decodeGeneralTime, writeInt64),
+			new SecDescAttributeSyntax(new AttrSyntaxInfo("String(NT-Sec-Desc)", "2.5.5.15", 0x80000 + 15, 66), this),
+			new BinaryAttributeSyntax(new AttrSyntaxInfo( "String(Numeric)", "2.5.5.6", 0x80000 + 6, 18)),
+			new OidAttributeSyntax(new AttrSyntaxInfo("String(Object-Identifier)", "2.5.5.2", 0x80000 + 2, 6), this),
+			new BinaryAttributeSyntax(new AttrSyntaxInfo("String(Octet)", "2.5.5.10", 0x80000 + 10, 4)),
+			new Utf16StringAttributeSyntax(new AttrSyntaxInfo("String(Printable)", "2.5.5.5", 0x80000 + 5, 19)),
+			new SidAttributeSyntax(new AttrSyntaxInfo("String(Sid)", "2.5.5.17", 0x80000 + 17, 4)),
+			new Utf16StringAttributeSyntax(new AttrSyntaxInfo("String(Teletex)", "2.5.5.4", 0x80000 + 4, 20)),
+			new Utf16StringAttributeSyntax(new AttrSyntaxInfo("String(Unicode)", "2.5.5.12", 0x80000 + 12, 64)),
+			this._utcTimeSyntax = new DateTimeAttributeSyntax(new AttrSyntaxInfo("String(UTC-Time)", "2.5.5.11", 0x80000 + 11, 23), false),
+			this._localTimeSyntax = new DateTimeAttributeSyntax(new AttrSyntaxInfo("String(Generalized-Time)", "2.5.5.11", 0x80000 + 11, 24), true),
 		};
 		this._syntaxes = syntaxes;
 
 		// Special syntaxes
-		this._guidSyntax = new AttributeSyntax(typeof(byte[]), "String(Guid)", "2.5.5.10", 0x80000 + 10, 4, null, readBytes, o => new Guid((byte[])o), writeBytes);
-		this._instanceTypeSyntax = new AttributeSyntax(typeof(ADInstanceType), "Enumeration(InstanceType)", "2.5.5.9", 0x80000 + 9, 2, null, readInt32, r => (ADInstanceType)(int)r, writeInt32);
-		this._systemFlagsSyntax = new AttributeSyntax(typeof(AttributeSystemFlags), "Enumeration(SystemFlags)", "2.5.5.9", 0x80000 + 9, 2, null, readInt32, r => (AttributeSystemFlags)(int)r, writeInt32);
-		this._searchFlagsSyntax = new AttributeSyntax(typeof(ADSearchFlags), "Enumeration(SearchFlags)", "2.5.5.9", 0x80000 + 9, 10, null, readInt32, r => (ADSearchFlags)(int)r, writeInt32);
+		this._fileTimeSyntax = new FileTimeAttributeSyntax(new AttrSyntaxInfo("Interval", "2.5.5.9", 0x80000 + 9, 65), false);
+		this._guidSyntax = new GuidAttributeSyntax(new AttrSyntaxInfo("String(Guid)", "2.5.5.10", 0x80000 + 10, 4));
+		this._instanceTypeSyntax = new Int32EnumAttributeSyntax<ADInstanceType>(new AttrSyntaxInfo("Enumeration(InstanceType)", "2.5.5.9", 0x80000 + 9, 2));
+		this._systemFlagsSyntax = new Int32EnumAttributeSyntax<AttributeSystemFlags>(new AttrSyntaxInfo("Enumeration(SystemFlags)", "2.5.5.9", 0x80000 + 9, 2));
+		this._searchFlagsSyntax = new Int32EnumAttributeSyntax<ADSearchFlags>(new AttrSyntaxInfo("Enumeration(SearchFlags)", "2.5.5.9", 0x80000 + 9, 10));
+		this._schemaFlagsExSyntax = new Int32EnumAttributeSyntax<ADSchemaFlagsEx>(new AttrSyntaxInfo("Enumeration(SchemaFlagsEx)", "2.5.5.9", 0x80000 + 9, 10));
+
+		// TODO: Verify OM-Syntax value
+		this._groupTypeSyntax = new Int32EnumAttributeSyntax<ADGroupType>(new AttrSyntaxInfo("Enumeration(GroupType)", "2.5.5.9", 0x80000 + 9, 10));
+		this._uacSyntax = new Int32EnumAttributeSyntax<ADUserAccountControlFlags>(new AttrSyntaxInfo("Enumeration(UserAccountControl)", "2.5.5.9", 0x80000 + 9, 10));
+		this._samAccountTypeSyntax = new Int32EnumAttributeSyntax<ADSamAccountType>(new AttrSyntaxInfo("Enumeration(SchemaFlagsEx)", "2.5.5.9", 0x80000 + 9, 10));
 
 		Dictionary<SyntaxKey, AttributeSyntax> syntaxesByKey = new Dictionary<SyntaxKey, AttributeSyntax>();
 		foreach (var syntax in syntaxes)
@@ -658,7 +700,7 @@ public partial class NtdsDirectory : IDirectory
 		this._syntaxesByKey = syntaxesByKey;
 	}
 
-	private static SecurityIdentifier ParseDirectorySid(object r)
+	internal static SecurityIdentifier DecodeDirectorySid(byte[] r)
 	{
 		byte[] bytes = (byte[])r;
 		// SecurityIdentifier expects the subauthority list in BE format,
@@ -675,14 +717,14 @@ public partial class NtdsDirectory : IDirectory
 		return TryGetSecurityDescriptor(r);
 	}
 
-	private object? TryGetSecurityDescriptor(long id)
+	internal object? TryGetSecurityDescriptor(long id)
 	{
 		var cur = this._sdCursor;
 		cur.MakeKey(id, MakeKeyGrbit.NewKey);
 		return TryGetSecurityDescriptorFromCursor(cur);
 	}
 
-	private object? TryGetSecurityDescriptor(byte[] id)
+	internal object? TryGetSecurityDescriptor(byte[] id)
 	{
 		var cur = this._sdCursor;
 		cur.MakeKey(id, MakeKeyGrbit.NewKey);
@@ -713,6 +755,11 @@ public partial class NtdsDirectory : IDirectory
 	/// <exception cref="ArgumentException">No class found with <paramref name="governsId"/></exception>
 	public NtdsClassSchema GetClassByGovernsId(int governsId)
 		=> this._classesByGovernsId[governsId];
+	internal NtdsClassSchema? TryGetClassByGovernsId(int governsId)
+	{
+		this._classesByGovernsId.TryGetValue(governsId, out var obj);
+		return obj;
+	}
 	/// <inheritdoc/>
 	IClassSchema IDirectory.GetClassByGovernsId(int governsId) => this.GetClassByGovernsId(governsId);
 
@@ -724,6 +771,12 @@ public partial class NtdsDirectory : IDirectory
 	public NtdsClassSchema[] GetClasses() => this._classes.ToArray();
 	/// <inheritdoc/>
 	IClassSchema[] IDirectory.GetClassSchemas() => this.GetClasses();
+
+	public NtdsClassSchema? TryGetClassByLdapName(string ldapName)
+	{
+		this._classesByLdapName.TryGetValue(ldapName, out var obj);
+		return obj;
+	}
 
 	/// <summary>
 	/// Gets a list of all attribute in the schemae.
@@ -772,6 +825,10 @@ public partial class NtdsDirectory : IDirectory
 	/// Gets the root domain object.
 	/// </summary>
 	public NtdsDirectoryObject RootDomain { get; }
+	/// <summary>
+	/// Gets the object at the root of the directory tree.
+	/// </summary>
+	public NtdsDirectoryObject RootObject { get; }
 	/// <inheritdoc/>
 	IDirectoryObject IDirectory.RootDomain => this.RootDomain;
 
@@ -813,7 +870,7 @@ public partial class NtdsDirectory : IDirectory
 	/// <param name="parentDnt">DNT of object</param>
 	/// <returns>A <see cref="NtdsDirectoryObject"/> representing the requested object.</returns>
 	/// <exception cref="DirectoryObjectNotFoundException">No object found matching <paramref name="dnt"/>.</exception>
-	internal NtdsDirectoryObject GetByDnt(int dnt)
+	public NtdsDirectoryObject GetByDnt(int dnt)
 	{
 		this.VerifyNotDisposed();
 
@@ -826,6 +883,115 @@ public partial class NtdsDirectory : IDirectory
 
 		return this.GetObjectFromRecord(cursor);
 	}
+	/// <summary>
+	/// Gets an object by its distinguished name.
+	/// </summary>
+	/// <param name="dn">DN of object</param>
+	/// <returns>The object identified by <paramref name="dn"/>.</returns>
+	public NtdsDirectoryObject GetObjectByDn(DistinguishedName dn)
+	{
+		if (dn is null) throw new ArgumentNullException(nameof(dn));
+
+		var parent = this.RootObject;
+		for (int i = dn.Parts.Length - 1; i >= 0; i--)
+		{
+			var part = dn.Parts[i];
+			var child = parent.GetChild(part.Value);
+			parent = child;
+		}
+
+		return parent;
+	}
+	/// <inheritdoc/>
+	IDirectoryObject IDirectory.GetObjectByDn(DistinguishedName dn)
+		=> this.GetObjectByDn(dn);
+	/// <summary>
+	/// Gets an object by its distinguished name.
+	/// </summary>
+	/// <param name="dn">DN of object</param>
+	/// <returns>The object identified by <paramref name="dn"/>.</returns>
+	public NtdsDirectoryObject GetObjectByDn(string dn)
+	{
+		if (string.IsNullOrEmpty(dn)) throw new ArgumentException($"'{nameof(dn)}' cannot be null or empty.", nameof(dn));
+		if (dn.StartsWith('<') && dn.EndsWith('>'))
+		{
+			if (dn.StartsWith("<SID=", StringComparison.OrdinalIgnoreCase))
+			{
+				var sidstr = dn.Substring(5, dn.Length - 6);
+				return this.GetObjectBySid(new SecurityIdentifier(sidstr));
+			}
+			else if (dn.StartsWith("<GUID="))
+			{
+				var guidstr = dn.Substring(6, dn.Length - 7);
+				return this.GetObjectByGuid(Guid.Parse(guidstr));
+			}
+			else if (dn.StartsWith("<DNT="))
+			{
+				var dntstr = dn.Substring(5, dn.Length - 6);
+				return this.GetByDnt(int.Parse(dntstr));
+			}
+			else
+			{
+				throw new ArgumentException(Messages.NtdsDirectory_BadExtendedDn, nameof(dn));
+			}
+		}
+
+		return this.GetObjectByDn(DistinguishedName.Parse(dn));
+	}
+	/// <inheritdoc/>
+	IDirectoryObject IDirectory.GetObjectByDn(string dn)
+		=> this.GetObjectByDn(dn);
+	/// <summary>
+	/// Gets an object with the specified GUID.
+	/// </summary>
+	/// <param name="guid">GUID to search for</param>
+	/// <returns>The <see cref="IDirectoryObject"/> with objectGuid equal to <paramref name="guid"/>.</returns>
+	public NtdsDirectoryObject GetObjectByGuid(Guid guid)
+	{
+		this.VerifyNotDisposed();
+
+		using (var cursor = this.Database.OpenTable(DataTableName))
+		{
+			cursor.SetIndex(GuidIndexName);
+			cursor.MakeKey(guid, MakeKeyGrbit.NewKey);
+			if (!cursor.Seek(SeekGrbit.SeekEQ))
+				throw new DirectoryObjectNotFoundException();
+			return this.GetObjectFromRecord(cursor);
+		}
+	}
+	IDirectoryObject IDirectory.GetObjectByGuid(Guid guid) => this.GetObjectByGuid(guid);
+
+	/// <summary>
+	/// Gets an object with the specified SID.
+	/// </summary>
+	/// <param name="sid">SID to search for</param>
+	/// <returns>The <see cref="IDirectoryObject"/> with objectSid equal to <paramref name="sid"/>.</returns>
+	public NtdsDirectoryObject GetObjectBySid(SecurityIdentifier sid)
+	{
+		this.VerifyNotDisposed();
+
+		using (var cursor = this.Database.OpenTable(DataTableName))
+		{
+			byte[] bytes = EncodeSid(sid);
+
+			cursor.SetIndex(ObjectSidIndex);
+			cursor.MakeKey(bytes, MakeKeyGrbit.NewKey);
+			if (!cursor.Seek(SeekGrbit.SeekEQ))
+				throw new DirectoryObjectNotFoundException();
+			return this.GetObjectFromRecord(cursor);
+		}
+	}
+
+	internal static byte[] EncodeSid(SecurityIdentifier sid)
+	{
+		byte[] bytes = new byte[sid.BinaryLength];
+		sid.GetBinaryForm(bytes, 0);
+		Span<byte> ridSpan = bytes.AsSpan(bytes.Length - 4);
+		BinaryPrimitives.WriteUInt32BigEndian(ridSpan, BinaryPrimitives.ReadUInt32LittleEndian(ridSpan));
+		return bytes;
+	}
+
+	IDirectoryObject IDirectory.GetObjectBySid(SecurityIdentifier sid) => this.GetObjectBySid(sid);
 
 	/// <summary>
 	/// Gets a <see cref="NtdsDirectoryObject"/> for a PDNT-name pair.
@@ -833,7 +999,7 @@ public partial class NtdsDirectory : IDirectory
 	/// <param name="parentDnt">DNT of parent</param>
 	/// <param name="name">Name of object</param>
 	/// <returns>A <see cref="NtdsDirectoryObject"/> representing the requested object, if found.</returns>
-	internal NtdsDirectoryObject GetByParentDntName(int parentDnt, string name)
+	public NtdsDirectoryObject GetByParentDntName(int parentDnt, string name)
 	{
 		Debug.Assert(!string.IsNullOrEmpty(name));
 
@@ -971,6 +1137,25 @@ public partial class NtdsDirectory : IDirectory
 		return obj;
 	}
 
+	private static readonly string[] timestampAttrNames = new string[]
+	{
+		// Unverified
+		"accountExpires",
+		"lockoutTime",
+		"builtinCreationTime",
+		"lSACreationTime",
+		"msKds-UseStartTime",
+	};
+	private static readonly string[] fileTimeAttrNames = new string[]
+	{
+		// Verified
+		"creationTime",
+		"pwdLastSet",
+		"lastLogon",
+		"lastLogonTimestamp",
+		"lastSetTime",
+		"badPasswordTime",
+	};
 	private AttributeSyntax? GetSyntaxFor(NtdsAttributeSchema attr)
 	{
 		const int ObjectGuidId = 589826;
@@ -979,7 +1164,12 @@ public partial class NtdsDirectory : IDirectory
 		const int SearchFlagsId = 131406;
 		const int SchemaGuidId = 589972;
 		const int AttributeSecurityGuidId = 589973;
-		const int secdescId = 131353;
+
+		const int SchemaFlagsExId = 589944;
+		const int SamAccountTypeId = 590126;
+		const int GroupTypeId = 590574;
+		const int UserAccountControlId = 589832;
+
 		if (attr.AttributeIdRaw == ObjectGuidId)
 			return this._guidSyntax;
 		else if (attr.AttributeIdRaw == InstanceTypeId)
@@ -988,13 +1178,25 @@ public partial class NtdsDirectory : IDirectory
 			return this._systemFlagsSyntax;
 		else if (attr.AttributeIdRaw == SearchFlagsId)
 			return this._searchFlagsSyntax;
+		else if (attr.AttributeIdRaw == SchemaFlagsExId)
+			return this._schemaFlagsExSyntax;
+		else if (attr.AttributeIdRaw == SamAccountTypeId)
+			return this._samAccountTypeSyntax;
+		else if (attr.AttributeIdRaw == GroupTypeId)
+			return this._groupTypeSyntax;
+		else if (attr.AttributeIdRaw == UserAccountControlId)
+			return this._uacSyntax;
+
 		else if (attr.AttributeIdRaw == SchemaGuidId)
 			return this._guidSyntax;
 		else if (attr.AttributeIdRaw == AttributeSecurityGuidId)
 			return this._guidSyntax;
-
 		else if (this._syntaxesByKey.TryGetValue(new SyntaxKey(attr.AttributeSyntaxIdPrefixEncoded, attr.OmSyntax), out var syntax))
 		{
+			if (Array.IndexOf(timestampAttrNames, attr.LdapDisplayName) >= 0)
+				syntax = this._utcTimeSyntax;
+			if (Array.IndexOf(fileTimeAttrNames, attr.LdapDisplayName) >= 0)
+				syntax = this._fileTimeSyntax;
 			return syntax;
 		}
 		return null;
@@ -1040,9 +1242,9 @@ public partial class NtdsDirectory : IDirectory
 		JetCursor cursor,
 		bool decode)
 	{
-		var value = attr.Syntax.retrieveFunc(cursor, attr.ColumnId, tag);
-		if (decode && value != null && attr.Syntax.decodeFunc != null)
-			value = attr.Syntax.decodeFunc(value);
+		var value = attr.Syntax.RetrieveValueFrom(cursor, attr.ColumnId, tag);
+		if (decode && value != null)
+			value = attr.Syntax.DecodeValue(value);
 		return value;
 	}
 
@@ -1063,21 +1265,28 @@ public partial class NtdsDirectory : IDirectory
 				if (attr == null)
 					continue;
 
-				object? value = null;
-				// TODO: Should this default to a different behavior such as returning the value as a byte[] ?
-				if (attr.IsLink)
+				try
 				{
-					value = this.GetLinkValues(obj, attr);
-				}
-				else if (attr.ExistsInDatabase && attr.Syntax != null && attr.Syntax.CanRetrieveValue)
-				{
-					value = attr.IsSingleValued ? RetrieveSingleValueAttribute(attr, 1, cursor, decode) : RetrieveMultiValueAttribute(attr, cursor);
-				}
-				else
-				{
-				}
+					object? value = null;
+					// TODO: Should this default to a different behavior such as returning the value as a byte[] ?
+					if (attr.IsLink)
+					{
+						value = this.GetLinkValues(obj, attr);
+					}
+					else if (attr.ExistsInDatabase && attr.Syntax != null && attr.Syntax.CanRetrieveValue)
+					{
+						value = attr.IsSingleValued ? RetrieveSingleValueAttribute(attr, 1, cursor, decode) : RetrieveMultiValueAttribute(attr, cursor);
+					}
+					else
+					{
+					}
 
-				values[i] = value;
+					values[i] = value;
+				}
+				catch
+				{
+					// TODO: Throw exception to indicate partial success
+				}
 			}
 
 
@@ -1166,15 +1375,14 @@ public partial class NtdsDirectory : IDirectory
 		var count = cursor.GetValueCount(attribute.ColumnId);
 		if (count > 0)
 		{
-			Array array = Array.CreateInstance(attribute.Syntax.AttributeType, count);
+			Array array = Array.CreateInstance(attribute.Syntax.AttributeType ?? typeof(object), count);
 			int validCount = 0;
 			for (int i = 0; i < count; i++)
 			{
-				var value = attribute.Syntax.retrieveFunc(cursor, attribute.ColumnId, i + 1);
+				var value = attribute.Syntax.RetrieveValueFrom(cursor, attribute.ColumnId, i + 1);
 				if (value != null)
 				{
-					if (attribute.Syntax.decodeFunc != null)
-						value = attribute.Syntax.decodeFunc(value);
+					value = attribute.Syntax.DecodeValue(value);
 
 					array.SetValue(value, validCount);
 					validCount++;
@@ -1211,6 +1419,30 @@ public partial class NtdsDirectory : IDirectory
 		finally
 		{
 			cur.CancelUpdate();
+		}
+	}
+
+	internal IEnumerable<IDirectoryObject> SearchSubtree(NtdsDirectoryObject searchRoot, DirectoryQuery query)
+	{
+		Debug.Assert(searchRoot != null);
+		Debug.Assert(query != null);
+
+		// TODO: Use indexes
+		// For now, take the naive approach of filtering the entire subtree
+		var subtreeItems = this.SearchSubtree(searchRoot);
+		foreach (var item in subtreeItems)
+		{
+			bool matches = false;
+			try
+			{
+				matches = (query.Filter.TestObject(item));
+			}
+			catch
+			{
+				// TODO: Collect errors and throw exceptions
+			}
+			if (matches)
+				yield return item;
 		}
 	}
 
@@ -1304,7 +1536,7 @@ public partial class NtdsDirectory : IDirectory
 		Debug.Assert(group.Directory == this);
 
 		// Get RID
-		var sidBytes = group.GetValueOf(this.GetAttributeById(ObjectSidAttrId), 1, false) as byte[];
+		var sidBytes = (group.GetValueOf(this.GetAttributeById(ObjectSidAttrId), 1, false) as byte[]);
 		if (sidBytes == null || sidBytes.Length == 0)
 			return Array.Empty<IDirectoryObject>();
 		var rid = BinaryPrimitives.ReadInt32BigEndian(sidBytes[^4..^0]);
@@ -1344,7 +1576,7 @@ public partial class NtdsDirectory : IDirectory
 		var groupId = member.GetValueOf(this.GetAttributeById(PrimaryGroupIdAttrId), 1, false) as int?;
 		if (groupId.HasValue)
 		{
-			var sidBytes = member.GetValueOf(this.GetAttributeById(ObjectSidAttrId), 1, false) as byte[];
+			var sidBytes = (member.GetValueOf(this.GetAttributeById(ObjectSidAttrId), 1, false) as byte[]);
 			if (sidBytes == null || sidBytes.Length == 0)
 				return Array.Empty<IDirectoryObject>();
 

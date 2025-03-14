@@ -33,12 +33,13 @@ namespace DitExplorer.CredentialExtraction
 			if (item is IDirectoryNode node)
 			{
 				var objcls = node.Object.ObjectClass;
-				bool hasCredentials =
+				bool hasCredentials = (objcls != null) && (
 					objcls.HasAttribute("unicodePwd")
 					|| objcls.HasAttribute("dBCSPwd")
 					|| objcls.HasAttribute("lmPwdHistory")
 					|| objcls.HasAttribute("ntPwdHistory")
-					|| objcls.HasAttribute("supplementalCredentials");
+					|| objcls.HasAttribute("supplementalCredentials")
+					);
 				if (hasCredentials)
 					return true;
 			}

@@ -129,6 +129,12 @@
   <data name="Directory_NoRootFound" xml:space="preserve">
     <value>Unable to open the directory.  No root domain was provided, and detection of the root domain failed.</value>
   </data>
+  <data name="Error_SchemaContainerNotFound" xml:space="preserve">
+    <value>The schema container was not find in the .dit file.</value>
+  </data>
+  <data name="NtdsDirectory_BadExtendedDn" xml:space="preserve">
+    <value>The extended DN contained an unknown attribute.</value>
+  </data>
   <data name="ObjectDisposedMessage" xml:space="preserve">
     <value>The object is disposed and can no longer be used.</value>
   </data>

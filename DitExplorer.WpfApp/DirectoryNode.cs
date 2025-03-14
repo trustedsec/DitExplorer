@@ -34,9 +34,17 @@ internal partial class DirectoryNode : Notifier
 		set => this.NotifyIfChanged(ref this._isExpanded, value);
 	}
 
+	private bool _isSelected;
+	[Browsable(false)]
+	public bool IsSelected
+	{
+		get { return _isSelected; }
+		set => this.NotifyIfChanged(ref _isSelected, value);
+	}
+
 
 	[DisplayName("Obj. Class")]
-	public string ObjectClassName => this.Object.ObjectClass.LdapDisplayName;
+	public string ObjectClassName => this.Object.ObjectClass?.LdapDisplayName ?? Messages.NonePlaceholder;
 
 	[DisplayName("Path")]
 	public string ObjectPath => this.Object.ObjectPath;
@@ -46,6 +54,15 @@ internal partial class DirectoryNode : Notifier
 
 
 	private ObservableCollection<DirectoryNode>? _children;
+	[Browsable(false)]
+	public IList<DirectoryNode>? Children
+	{
+		get
+		{
+			this.EnsurePopulated();
+			return this._children;
+		}
+	}
 	private CollectionView? _childrenView;
 
 	[Browsable(false)]
@@ -53,19 +70,43 @@ internal partial class DirectoryNode : Notifier
 	{
 		get
 		{
-			if (this._childrenView == null)
-			{
-				this._children = new ObservableCollection<DirectoryNode>();
-				this._childrenView = new ListCollectionView(this._children);
-
-				// TODO: Run in background once Jet session synchronization is implemented
-				this.PopulateChildren();
-			}
+			EnsurePopulated();
 			return this._childrenView;
 		}
 	}
 
-	private async void PopulateChildren()
+	private void EnsurePopulated()
+	{
+		if (this._childrenView == null)
+		{
+			this._children = new ObservableCollection<DirectoryNode>();
+			this._childrenView = new ListCollectionView(this._children);
+
+			// TODO: Run in background once Jet session synchronization is implemented
+			_ = this.PopulateChildren();
+		}
+	}
+
+	private event EventHandler? _populatedEvent;
+	[Browsable(false)]
+	public event EventHandler Populated
+	{
+		add
+		{
+			if (this.IsPopulated)
+				value.Invoke(this, EventArgs.Empty);
+			else
+				this._populatedEvent += value;
+		}
+		remove
+		{
+			this._populatedEvent -= value;
+		}
+	}
+
+	[Browsable(false)]
+	public bool IsPopulated { get; private set; }
+	private async Task PopulateChildren()
 	{
 		//try
 		{
@@ -77,6 +118,10 @@ internal partial class DirectoryNode : Notifier
 				await Task.Yield();
 				items.Add(item);
 			}
+
+			this.IsPopulated = true;
+			this._populatedEvent?.Invoke(this, EventArgs.Empty);
+			this._populatedEvent = null;
 		}
 		//catch
 		//{

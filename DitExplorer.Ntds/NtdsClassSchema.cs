@@ -15,6 +15,7 @@ public sealed class NtdsClassSchema : NtdsSchemaObject, IClassSchema
 	/// Gets the encoded form of the governsID attribute.
 	/// </summary>
 	public int GovernsIdRaw { get; internal set; }
+	internal override int RawId => this.GovernsIdRaw;
 	/// <summary>
 	/// Gets the DNT of the superclass of this class.
 	/// </summary>

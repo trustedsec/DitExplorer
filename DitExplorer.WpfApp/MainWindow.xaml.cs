@@ -27,11 +27,4 @@ public partial class MainWindow : Window
 		var vm = (AppViewModel)this.DataContext;
 		vm.OnTreeNodeSelected(e.NewValue);
 	}
-
-	private void itemsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-	{
-		ListView lvw = (ListView)sender;
-		var vm = (AppViewModel)this.DataContext;
-		vm.OnSelectionChanged();
-	}
 }

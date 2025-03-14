@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DitExplorer.Core\DitExplorer.Core.csproj" />
     <ProjectReference Include="..\DitExplorer.EseInterop\DitExplorer.EseInterop.csproj" />
+    <ProjectReference Include="..\DitExplorer.Utilities\DitExplorer.Utilities.csproj" />
   </ItemGroup>
 
   <ItemGroup>

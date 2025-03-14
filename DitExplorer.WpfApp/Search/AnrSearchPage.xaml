@@ -1,0 +1,47 @@
+﻿<UserControl x:Class="DitExplorer.UI.WpfApp.Search.AnrSearchPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DitExplorer.UI.WpfApp"
+			 FocusManager.IsFocusScope="True"
+			 FocusManager.FocusedElement="{Binding ElementName=simpleSearchBox}"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+	<Grid Margin="6">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="Auto"/>
+			<ColumnDefinition Width="6"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+
+		<AccessText Text="{x:Static local:Messages.General_NameAccessText}" VerticalAlignment="Center"/>
+		<TextBox Grid.Column="2" x:Name="simpleSearchBox" Text="{Binding SearchName, UpdateSourceTrigger=PropertyChanged}" Margin="6"/>
+
+		<AccessText Grid.Row="1" Text="{x:Static local:Messages.ObjectClass_Label}" VerticalAlignment="Center"/>
+		<ComboBox
+			Grid.Row="1"
+			Grid.Column="2"
+			SelectedItem="{Binding SelectedClass}"
+			ItemsSource="{Binding Classes}"
+			Margin="6">
+			<ComboBox.ItemTemplate>
+				<DataTemplate>
+					<TextBlock Text="{Binding LdapDisplayName}"/>
+				</DataTemplate>
+			</ComboBox.ItemTemplate>
+		</ComboBox>
+
+		<CheckBox
+			Grid.Row="2"
+			Grid.Column="2"
+			Content="{x:Static local:Messages.IncludeSubclasses_Label}"
+			IsChecked="{Binding IncludesSubclasses}"
+			/>
+	</Grid>
+</UserControl>

@@ -8,12 +8,11 @@
 		d:DataContext="{d:DesignInstance Type=local:ObjectSearchViewModel}"
 		mc:Ignorable="d"
 		b:CommandFrame.CommandHandler="{Binding}"
-		FocusManager.FocusedElement="{Binding ElementName=simpleSearchBox}"
         Title="{Binding Title}" Height="450" Width="800">
 	<Grid Margin="6">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="150"/>
 			<RowDefinition Height="6"/>
 			<RowDefinition Height="*"/>
 		</Grid.RowDefinitions>
@@ -36,45 +35,26 @@
 				<ColumnDefinition Width="Auto"/>
 			</Grid.ColumnDefinitions>
 
-			<TabControl SelectedIndex="{Binding SearchMode}" Margin="6">
-				<TabItem Header="By Name" IsSelected="True">
-					<Grid Margin="6">
-						<Grid.ColumnDefinitions>
-							<ColumnDefinition Width="Auto"/>
-							<ColumnDefinition Width="6"/>
-							<ColumnDefinition Width="*"/>
-						</Grid.ColumnDefinitions>
-						<Grid.RowDefinitions>
-							<RowDefinition Height="Auto"/>
-							<RowDefinition Height="Auto"/>
-							<RowDefinition Height="Auto"/>
-						</Grid.RowDefinitions>
-
-						<AccessText Text="{x:Static local:Messages.General_NameAccessText}" VerticalAlignment="Center"/>
-						<TextBox Grid.Column="2" x:Name="simpleSearchBox" Text="{Binding SearchName, UpdateSourceTrigger=PropertyChanged}" Margin="6"/>
-
-						<AccessText Grid.Row="1" Text="{x:Static local:Messages.ObjectClass_Label}" VerticalAlignment="Center"/>
-						<ComboBox
-							Grid.Row="1"
-							Grid.Column="2"
-							SelectedItem="{Binding SelectedClass}"
-							ItemsSource="{Binding Classes}"
-							Margin="6">
-							<ComboBox.ItemTemplate>
-								<DataTemplate>
-									<TextBlock Text="{Binding LdapDisplayName}"/>
-								</DataTemplate>
-							</ComboBox.ItemTemplate>
-						</ComboBox>
-
-						<CheckBox
-							Grid.Row="2"
-							Grid.Column="2"
-							Content="{x:Static local:Messages.IncludeSubclasses_Label}"
-							IsChecked="{Binding IncludesSubclasses}"
-							/>
-					</Grid>
-				</TabItem>
+			<TabControl
+				x:Name="searchTabs"
+				SelectedItem="{Binding SelectedSearchHandler}"
+				Margin="6"
+				ItemsSource="{Binding SearchHandlers}"
+				Loaded="searchTabs_Loaded"
+				>
+				<TabControl.ItemContainerStyle>
+					<Style TargetType="TabItem">
+						<Setter Property="Header" Value="{Binding Header}"/>
+						<Setter Property="Content" Value="{Binding Content}"/>
+					</Style>
+				</TabControl.ItemContainerStyle>
+				<TabControl.ContentTemplate>
+					<DataTemplate>
+						<ScrollViewer VerticalScrollBarVisibility="Auto">
+							<ContentPresenter Content="{Binding}"/>
+						</ScrollViewer>
+					</DataTemplate>
+				</TabControl.ContentTemplate>
 			</TabControl>
 
 			<StackPanel Grid.Column="2" Margin="6">
@@ -88,6 +68,14 @@
 			</StackPanel>
 		</Grid>
 
+		<GridSplitter
+			Grid.Row="2"
+			HorizontalAlignment="Stretch"
+			VerticalAlignment="Stretch"
+			ResizeDirection="Rows"
+			ResizeBehavior="PreviousAndNext"
+			/>
+		
 		<ListView
 			Grid.Row="3"
 			ItemsSource="{Binding Results}"

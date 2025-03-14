@@ -69,6 +69,17 @@ public partial class JetCursor
 	/// Call this method (or another overload) to build a key before calling <see cref="Seek(SeekGrbit)"/> or
 	/// <see cref="SetIndexRange(SetIndexRangeGrbit)(string)"/>.
 	/// </remarks>
+	// TODO: Use Span<byte> to avoid creating a byte array
+	public void MakeKey(Guid value, MakeKeyGrbit options) => this.MakeKey(value.ToByteArray(), options);
+	/// <summary>
+	/// Constructs a key.
+	/// </summary>
+	/// <param name="value"></param>
+	/// <param name="options"></param>
+	/// <remarks>
+	/// Call this method (or another overload) to build a key before calling <see cref="Seek(SeekGrbit)"/> or
+	/// <see cref="SetIndexRange(SetIndexRangeGrbit)(string)"/>.
+	/// </remarks>
 	public void MakeKey(int value, MakeKeyGrbit options) => this.MakeKey(BitConverter.GetBytes(value), options);
 	/// <summary>
 	/// Constructs a key.
@@ -526,7 +537,7 @@ public partial class JetCursor
 				bytes.Length,
 				out var actualLength,
 				RetrieveColumnGrbit.None,
-				null
+				new JET_RETINFO() { itagSequence = tag }
 				);
 		}
 		catch (EsentCallbackFailedException)

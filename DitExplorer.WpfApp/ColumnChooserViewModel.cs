@@ -140,8 +140,8 @@ internal class ColumnChooserViewModel : ViewModel
 	{
 		var columns = set?.Columns ?? new List<ColumnChoice>();
 		if (searchText != null)
-			columns = columns.FindAll(r =>
-				r.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+			columns = columns.FindAll(r => r.IsChecked
+				|| r.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)
 				|| (r.Property.DisplayName?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false)
 				|| (r.Property.Description?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false)
 				);

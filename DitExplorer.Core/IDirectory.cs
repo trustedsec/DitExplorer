@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -41,4 +42,31 @@ public interface IDirectory : IDisposable
 	/// <returns>The <see cref="IAttributeSchema"/> with the LDAP name <paramref name="name"/>, if found;
 	/// otherwise, <see langword="null"/>.</returns>
 	IAttributeSchema? TryGetAttributeByLdapName(string name);
+
+	/// <summary>
+	/// Gets an object by its distinguished name.
+	/// </summary>
+	/// <param name="dn">DN of object</param>
+	/// <returns>The object identified by <paramref name="dn"/>.</returns>
+	IDirectoryObject GetObjectByDn(DistinguishedName dn);
+	/// <summary>
+	/// Gets an object by its distinguished name.
+	/// </summary>
+	/// <param name="dn">DN of object</param>
+	/// <returns>The object identified by <paramref name="dn"/>.</returns>
+	IDirectoryObject GetObjectByDn(string dn);
+	/// <summary>
+	/// Gets an object with the specified GUID.
+	/// </summary>
+	/// <param name="guid">GUID to search for</param>
+	/// <returns>The <see cref="IDirectoryObject"/> with objectGuid equal to <paramref name="guid"/>.</returns>
+	/// <exception cref="DirectoryObjectNotFoundException">No object found with <paramref name="guid"/>.</exception>
+	IDirectoryObject GetObjectByGuid(Guid guid);
+	/// <summary>
+	/// Gets an object with the specified SID.
+	/// </summary>
+	/// <param name="sid">SID to search for</param>
+	/// <returns>The <see cref="IDirectoryObject"/> with objectSid equal to <paramref name="sid"/>.</returns>
+	/// <exception cref="DirectoryObjectNotFoundException">No object found with <paramref name="sid"/>.</exception>
+	IDirectoryObject GetObjectBySid(SecurityIdentifier sid);
 }

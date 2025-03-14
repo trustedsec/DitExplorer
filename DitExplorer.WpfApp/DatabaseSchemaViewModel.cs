@@ -113,9 +113,7 @@ namespace DitExplorer.UI.WpfApp
 							}
 						}
 
-						var msgres = MessageBox.Show(Window, $"Finished exporting {recordCount} records to {fileName}.\r\n\r\nWould you like to open the folder containing the file?", Messages.File_ExportTableDataTitle, MessageBoxButton.YesNo, MessageBoxImage.Information);
-						if (msgres == MessageBoxResult.Yes)
-							Process.Start(new ProcessStartInfo("explorer.exe", "/select," + fileName));
+						ReportExportSuccess(fileName, recordCount, Messages.File_ExportTableDataTitle);
 					}
 					catch (Exception ex)
 					{

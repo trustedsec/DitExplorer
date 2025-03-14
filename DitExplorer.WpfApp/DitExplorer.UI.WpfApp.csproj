@@ -42,7 +42,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Actions\" />
     <Folder Include="Behaviors\" />
     <Folder Include="Extensibility\" />
   </ItemGroup>

@@ -81,11 +81,53 @@ internal partial class AppViewModel : ViewModel
 				DirectoryView dirView = new DirectoryView(dir);
 				_dirView = dirView;
 
-				DirectoryNode node = dirView.NodeForObject(CurrentDirectory.RootDomain);
-				node.IsExpanded = true;
+				var rootObject = (dir is NtdsDirectory ntds)
+					? ntds.RootObject
+					: dir.RootDomain;
+				DirectoryNode rootNode = dirView.NodeForObject(rootObject);
+				RootNodes.Add(rootNode);
+				rootNode.IsExpanded = true;
 
-				RootNodes.Add(node);
-				SelectedNode = node;
+				// Navigate to root domain node
+				DirectoryNode? domainNode = null;
+				{
+					Stack<IDirectoryObject> objStack = new();
+					var domainObj = dir.RootDomain;
+					var parentObj = domainObj;
+					while (parentObj != null && !parentObj.Equals(rootObject))
+					{
+						objStack.Push(parentObj);
+						parentObj = parentObj.Parent;
+					}
+
+					var parentNode = rootNode;
+					parentNode.IsExpanded = true;
+
+					EventHandler populatedHandler = null;
+					populatedHandler = (o, e) =>
+					{
+						var node = (DirectoryNode)o;
+						if (node != null && objStack.Count > 0)
+						{
+							var obj = objStack.Pop();
+							var childNode = node.Children?.FirstOrDefault(r => r.Object.Equals(obj));
+							if (childNode != null)
+							{
+								childNode.IsExpanded = true;
+								childNode.Populated += populatedHandler;
+							}
+							else
+							{
+								this.SelectedNode = node;
+							}
+						}
+						else
+						{
+							this.SelectedNode = node;
+						}
+					};
+					parentNode.Populated += populatedHandler;
+				}
 
 				ListVM.OnDirectoryLoaded(dirView);
 			}
@@ -133,7 +175,17 @@ internal partial class AppViewModel : ViewModel
 		{
 			if (NotifyIfChanged(ref _selectedNode, value))
 				StartPopulateItems(value);
+			this.SelectedObject = value;
+			if (value != null)
+				value.IsSelected = true;
 		}
+	}
+
+	private object? _selectedObject;
+	public object? SelectedObject
+	{
+		get { return _selectedObject; }
+		set => this.NotifyIfChanged(ref _selectedObject, value);
 	}
 
 	internal void OnTreeNodeSelected(object newValue)
@@ -164,11 +216,6 @@ internal partial class AppViewModel : ViewModel
 			Items = items;
 		}
 	}
-
-	internal void OnSelectionChanged()
-	{
-	}
-
 
 	private void InspectObject(object param)
 	{

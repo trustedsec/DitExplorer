@@ -2,7 +2,7 @@
 
 namespace DitExplorer.UI.WpfApp.Actions
 {
-	public sealed class ViewMembersAction : SingleItemAction<IDirectoryNode>
+	internal sealed class ViewMembersAction : SingleItemAction<IDirectoryNode>
 	{
 		public override string MenuText => "View Members";
 

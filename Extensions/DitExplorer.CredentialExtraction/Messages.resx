@@ -120,11 +120,41 @@
   <data name="CredentialExtractor_Title" xml:space="preserve">
     <value>Credential Extractor</value>
   </data>
+  <data name="Credential_CleartextPassword" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Credential_KerberosAes128CtsHmacSha1_96" xml:space="preserve">
+    <value>Kerberos (aes128-cts-hmac-sha1-96)</value>
+  </data>
+  <data name="Credential_KerberosAes256CtsHmacSha1_96" xml:space="preserve">
+    <value>Kerberos (aes256-cts-hmac-sha1-96)</value>
+  </data>
+  <data name="Credential_KerberosDecCbcCrc" xml:space="preserve">
+    <value>Kerberos (dec-cbc-crc)</value>
+  </data>
+  <data name="Credential_KerberosDesCbcMd5" xml:space="preserve">
+    <value>Kerberos (des-cbc-md5)</value>
+  </data>
+  <data name="Credential_KerberosSalt" xml:space="preserve">
+    <value>Kerberos salt</value>
+  </data>
   <data name="Credential_LmHash" xml:space="preserve">
     <value>LM hash</value>
   </data>
+  <data name="Credential_LmHistory" xml:space="preserve">
+    <value>LM history</value>
+  </data>
   <data name="Credential_NtHash" xml:space="preserve">
     <value>NT hash</value>
+  </data>
+  <data name="Credential_NtHistory" xml:space="preserve">
+    <value>NT history</value>
+  </data>
+  <data name="Credential_StrongNtowfKey" xml:space="preserve">
+    <value>Strong NTOWF key</value>
+  </data>
+  <data name="Credential_WDigest" xml:space="preserve">
+    <value>WDigest</value>
   </data>
   <data name="Export_Command" xml:space="preserve">
     <value>E_xport...</value>

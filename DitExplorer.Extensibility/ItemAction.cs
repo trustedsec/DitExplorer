@@ -28,12 +28,12 @@ namespace DitExplorer
 
 	public abstract class SingleItemAction<T> : ItemAction
 	{
-		public sealed override bool CanExecute(object[] items, IItemActionContext context)
+		public sealed override bool CanExecute(object[] item, IItemActionContext context)
 		{
-			return (items is not null) && (items.Length == 1) && items[0] is T typed && CanExecute(typed, context);
+			return (item is not null) && (item.Length == 1) && item[0] is T typed && CanExecute(typed, context);
 		}
 
-		public abstract bool CanExecute(T items, IItemActionContext context);
+		public abstract bool CanExecute(T item, IItemActionContext context);
 
 		public sealed override void Execute(object[] items, IItemActionContext context)
 		{

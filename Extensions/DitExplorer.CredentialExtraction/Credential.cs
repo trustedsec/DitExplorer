@@ -2,10 +2,26 @@
 
 public enum CredentialType
 {
+	Unspecified = 0,
+
 	LmHash,
 	NtHash,
+	StrongNtowfKey,
 	Password,
-	KerberosAes256,
+	KerberosSalt,
+	KerberosDecCbcCrc,
+	KerberosDesCbcMd5,
+	KerberosAes128CtsHmacSha1_96,
+	KerberosAes256CtsHmacSha1_96,
+
+	// These types of credentials can have multiple values
+	WDigestGroup = 0x100,
+	KerberosOld = 0x200,
+	LmHistory = 0x300,
+	NtHistory = 0x400,
+
+	GroupMask = 0xFF00,
+	IndexMask = 0xFF,
 }
 
 /// <summary>
@@ -13,25 +29,16 @@ public enum CredentialType
 /// </summary>
 public abstract class Credential
 {
-	protected Credential(IDirectoryObject obj, CredentialType credentialType, string? errorDetails)
+	protected Credential(CredentialType credentialType, string? errorDetails)
 	{
-		this.Object = obj;
 		this.CredentialType = credentialType;
 		this.ErrorDetails = errorDetails;
 	}
 
 	public abstract string? Text { get; }
-	public IDirectoryObject Object { get; }
+	/// <inheritdoc/>
+	public sealed override string ToString() => this.Text;
 	public CredentialType CredentialType { get; }
-	public string Label => this.CredentialType switch
-	{
-		CredentialType.LmHash => Messages.Credential_LmHash,
-		CredentialType.NtHash => Messages.Credential_NtHash,
-		// TODO: It's coming
-		//CredentialType.Password => "Clear-text password",
-		//CredentialType.KerberosAes256 => "Kerberos AES-256 key",
-		_ => "(other)"
-	};
 	public string? ErrorDetails { get; }
 }
 /// <summary>
@@ -39,13 +46,16 @@ public abstract class Credential
 /// </summary>
 public sealed class HashCredential : Credential
 {
-	internal HashCredential(IDirectoryObject obj, CredentialType credentialType, byte[] hash)
-		: base(obj, credentialType, null)
+	public const string MissingLmHash = "aad3b435b51404eeaad3b435b51404ee";
+	public const string MissingNtHash = "31d6cfe0d16ae931b73c59d7e0c089c0";
+
+	internal HashCredential(CredentialType credentialType, byte[] hash)
+		: base(credentialType, null)
 	{
 		this.Hash = hash;
 	}
-	internal HashCredential(IDirectoryObject obj, CredentialType credentialType, string? errorDetails)
-		: base(obj, credentialType, errorDetails)
+	internal HashCredential(CredentialType credentialType, string? errorDetails)
+		: base(credentialType, errorDetails)
 	{
 
 	}
@@ -54,4 +64,17 @@ public sealed class HashCredential : Credential
 	public override string? Text => (this._text ??= this.Hash.ToHexString(HexStringOptions.Lowercase, string.Empty));
 	public byte[]? Hash { get; }
 
+}
+/// <summary>
+/// Describes a credential expressed as clear text.
+/// </summary>
+public sealed class CleartextCredential : Credential
+{
+	internal CleartextCredential(CredentialType credentialType, string text)
+		: base(credentialType, null)
+	{
+		this.Text = text;
+	}
+
+	public override string? Text { get; }
 }

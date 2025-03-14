@@ -61,6 +61,60 @@ namespace DitExplorer.CredentialExtraction {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Password.
+        /// </summary>
+        public static string Credential_CleartextPassword {
+            get {
+                return ResourceManager.GetString("Credential_CleartextPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kerberos (aes128-cts-hmac-sha1-96).
+        /// </summary>
+        public static string Credential_KerberosAes128CtsHmacSha1_96 {
+            get {
+                return ResourceManager.GetString("Credential_KerberosAes128CtsHmacSha1_96", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kerberos (aes256-cts-hmac-sha1-96).
+        /// </summary>
+        public static string Credential_KerberosAes256CtsHmacSha1_96 {
+            get {
+                return ResourceManager.GetString("Credential_KerberosAes256CtsHmacSha1_96", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kerberos (dec-cbc-crc).
+        /// </summary>
+        public static string Credential_KerberosDecCbcCrc {
+            get {
+                return ResourceManager.GetString("Credential_KerberosDecCbcCrc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kerberos (des-cbc-md5).
+        /// </summary>
+        public static string Credential_KerberosDesCbcMd5 {
+            get {
+                return ResourceManager.GetString("Credential_KerberosDesCbcMd5", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kerberos salt.
+        /// </summary>
+        public static string Credential_KerberosSalt {
+            get {
+                return ResourceManager.GetString("Credential_KerberosSalt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to LM hash.
         /// </summary>
         public static string Credential_LmHash {
@@ -70,11 +124,47 @@ namespace DitExplorer.CredentialExtraction {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to LM history.
+        /// </summary>
+        public static string Credential_LmHistory {
+            get {
+                return ResourceManager.GetString("Credential_LmHistory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to NT hash.
         /// </summary>
         public static string Credential_NtHash {
             get {
                 return ResourceManager.GetString("Credential_NtHash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to NT history.
+        /// </summary>
+        public static string Credential_NtHistory {
+            get {
+                return ResourceManager.GetString("Credential_NtHistory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Strong NTOWF key.
+        /// </summary>
+        public static string Credential_StrongNtowfKey {
+            get {
+                return ResourceManager.GetString("Credential_StrongNtowfKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to WDigest.
+        /// </summary>
+        public static string Credential_WDigest {
+            get {
+                return ResourceManager.GetString("Credential_WDigest", resourceCulture);
             }
         }
         

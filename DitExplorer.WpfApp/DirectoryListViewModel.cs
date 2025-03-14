@@ -22,8 +22,15 @@ namespace DitExplorer.UI.WpfApp
 		{
 			RegisterCommand(MyCommands.ChooseColumns, ShowColumnChooser);
 			RegisterCommand<object>(ApplicationCommands.Properties, InspectObject);
+			RegisterCommand<SetDisplayFormatCommandParam>(SetDisplayFormatCommand, SetDisplayFormat);
 			this.actionRegistry = actionRegistry;
 			this._directory = directory;
+		}
+
+		private void SetDisplayFormat(SetDisplayFormatCommandParam param)
+		{
+			var prop = FlexGrid.GetDisplayProperty(param.col);
+			param.col.CellTemplate = CreateCellTemplate(prop, param.format.FormatString);
 		}
 
 		private ListView _itemsListView;
@@ -63,7 +70,8 @@ namespace DitExplorer.UI.WpfApp
 
 		internal static GridViewColumn CreateColumn(
 			PropertyDescriptor property,
-			string header
+			string header,
+			string? stringFormat = null
 			)
 		{
 			GridViewColumn column = new GridViewColumn()
@@ -74,15 +82,22 @@ namespace DitExplorer.UI.WpfApp
 			ListViewSorting.SetSortProperty(column, property.Name);
 			//column.DisplayMemberBinding = new Binding(property.Name);
 
+			DataTemplate cellTemplate = CreateCellTemplate(property, stringFormat);
+
+			column.CellTemplate = cellTemplate;
+			FlexGrid.SetDisplayProperty(column, property);
+
+			return column;
+		}
+
+		private static DataTemplate CreateCellTemplate(PropertyDescriptor property, string stringFormat)
+		{
 			var isMulti = MultiValue.GetElementType(property.PropertyType) is not null;
-			var binding = new Binding() { Path = new PropertyPath(property.Name) };
+			var binding = new Binding() { Path = new PropertyPath(property.Name), StringFormat = stringFormat };
 			DataTemplate cellTemplate =
 				isMulti ? CreateMultiCellTemplate(property, binding)
 				: CreateCellTemplate(property, binding);
-
-			column.CellTemplate = cellTemplate;
-
-			return column;
+			return cellTemplate;
 		}
 
 		private static DataTemplate CreateCellTemplate(PropertyDescriptor? property, Binding binding)
@@ -129,11 +144,42 @@ namespace DitExplorer.UI.WpfApp
 					_columnChooser.Activate();
 		}
 
-		private static PropertyDescriptor? GetDisplayPropertyOf(DependencyObject? target, DependencyObject owner)
+		private static GridViewColumn? GetColumnOf(DependencyObject? element, ListView lvw)
 		{
-			while (target != null && target != owner)
+			while (element != null && element != lvw)
 			{
-				var prop = FlexGrid.GetDisplayProperty(target);
+				if (element is GridViewColumnHeader hdr)
+					return hdr.Column;
+				var parent = VisualTreeHelper.GetParent(element);
+				if (parent is GridViewRowPresenter row)
+				{
+					var childCount = VisualTreeHelper.GetChildrenCount(row);
+					for (int i = 0; i < childCount; i++)
+					{
+						var child = VisualTreeHelper.GetChild(row, i);
+						if (child == element)
+						{
+							return row.Columns[i];
+						}
+					}
+				}
+
+				element = parent;
+			}
+
+			return null;
+		}
+
+		private static PropertyDescriptor? GetDisplayPropertyOf(DependencyObject? target, ListView lvw)
+		{
+			while (target != null && target != lvw)
+			{
+				PropertyDescriptor? prop;
+				if (target is GridViewColumnHeader hdr)
+					prop = FlexGrid.GetDisplayProperty(hdr.Column);
+				else
+					prop = FlexGrid.GetDisplayProperty(target);
+
 				if (prop != null)
 					return prop;
 
@@ -185,12 +231,14 @@ namespace DitExplorer.UI.WpfApp
 					if (menu.Items.Count > 0)
 						menu.Items.Add(new Separator());
 
+					var col = GetColumnOf(source, lvw);
+					var prop = (col != null) ? FlexGrid.GetDisplayProperty(col) : null;
+
 					if (context.Items.Length > 0)
 					{
-						var prop = GetDisplayPropertyOf(source, target);
 						// CopyValue
 						if (prop != null)
-							menu.Items.Add(new MenuItem() { Header = Messages.Edit_CopyValueMenuText, Command = MyCommands.CopyValue, CommandParameter = new CellSpec(item, prop) });
+							menu.Items.Add(new MenuItem() { Header = Messages.Edit_CopyValueMenuText, Command = MyCommands.CopyValue, CommandParameter = source });
 						// CopyItems
 						menu.Items.Add(new MenuItem() { Header = Messages.Edit_CopyItemsMenuText, Command = MyCommands.CopySelection, CommandParameter = lvw, CommandTarget = lvw });
 						// Copy DN
@@ -209,6 +257,32 @@ namespace DitExplorer.UI.WpfApp
 					menu.Items.Add(new MenuItem() { Header = Messages.File_ExportMenuText, Command = MyCommands.ExportList });
 					// Columns...
 					menu.Items.Add(new MenuItem() { Header = Messages.View_ColumnsMenuText, Command = MyCommands.ChooseColumns, CommandTarget = lvw });
+
+					{
+						// Formats
+						if (prop != null)
+						{
+							var formats = App.GetDisplayFormatsFor(prop);
+							if (formats.Length > 0)
+							{
+								if (menu.Items.Count > 0)
+									menu.Items.Add(new Separator());
+								MenuItem formatsMenu = new MenuItem { Header = Messages.View_DisplayFormatMenuText };
+								menu.Items.Add(formatsMenu);
+								foreach (var format in formats)
+								{
+									formatsMenu.Items.Add(new MenuItem
+									{
+										Header = format.DisplayName,
+										CommandParameter = new SetDisplayFormatCommandParam() { col = col, format = format },
+										CommandTarget = target,
+										Command = SetDisplayFormatCommand
+									});
+								}
+							}
+						}
+						//menu.Items.Add(new MenuItem() { Header = Messages.Edit_CopyValueMenuText, Command = MyCommands.CopyValue, CommandParameter = new CellSpec(item, prop) });
+					}
 				}
 				else if (item != null)
 				{
@@ -235,6 +309,14 @@ namespace DitExplorer.UI.WpfApp
 				}
 			}
 		}
+
+		private static readonly ICommand SetDisplayFormatCommand = new RoutedCommand();
+		class SetDisplayFormatCommandParam
+		{
+			internal GridViewColumn col;
+			internal AttributeFormat format;
+		}
+
 
 		private IList<ItemAction> FindItemActionsFor(
 			object[] items,

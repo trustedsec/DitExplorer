@@ -32,6 +32,7 @@ public interface IDirectoryObject
 	object[] GetValueOfMultiple(IList<IAttributeSchema> attributes);
 	IEnumerable<IDirectoryObject> SearchSubtree(string? searchName);
 	IEnumerable<IDirectoryObject> SearchSubtree(string? searchName, IClassSchema? objectClass, bool includeSubclasses);
+	IEnumerable<IDirectoryObject> SearchSubtree(DirectoryQuery query);
 
 	/// <summary>
 	/// Gets the object class schema.

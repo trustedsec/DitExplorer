@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 
@@ -134,4 +135,7 @@ public class ViewModel : Notifier, ICommandHandler
 		Window = Window.GetWindow(element);
 		OnViewLoaded(element);
 	}
+
+	protected void ReportExportSuccess(string fileName, int recordCount, string title)
+		=> UiHelper.ReportExportSuccess(fileName, recordCount, title, this.Window);
 }

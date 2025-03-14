@@ -14,7 +14,15 @@ internal static class SidExtensions
 	{
 		byte[] sidBytes = new byte[sid.BinaryLength];
 		sid.GetBinaryForm(sidBytes, 0);
-		var rid = BinaryPrimitives.ReadUInt32LittleEndian(new ReadOnlySpan<byte>(sidBytes).Slice(sid.BinaryLength - 4,4));
+		var rid = BinaryPrimitives.ReadUInt32LittleEndian(new ReadOnlySpan<byte>(sidBytes).Slice(sid.BinaryLength - 4, 4));
+		return rid;
+	}
+	public static uint GetRid(this SecurityIdentifier sid, ref byte[]? buffer)
+	{
+		if (sid.BinaryLength > buffer.Length)
+			buffer = new byte[sid.BinaryLength];
+		sid.GetBinaryForm(buffer, 0);
+		var rid = BinaryPrimitives.ReadUInt32LittleEndian(new ReadOnlySpan<byte>(buffer).Slice(sid.BinaryLength - 4, 4));
 		return rid;
 	}
 }

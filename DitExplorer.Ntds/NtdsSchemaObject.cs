@@ -13,6 +13,8 @@ public abstract class NtdsSchemaObject : NtdsDirectoryObject, ISchemaObject
 	/// <inheritdoc/>
 	public sealed override string ToString() => this.LdapDisplayName;
 
+	internal abstract int RawId { get; }
+
 	/// <summary>
 	/// Gets the LDAP display name of the object.
 	/// </summary>

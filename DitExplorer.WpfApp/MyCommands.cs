@@ -31,4 +31,6 @@ internal class MyCommands
 	public static RoutedCommand Cancel = new RoutedCommand();
 
 	public static RoutedCommand ShowAllValues = new RoutedCommand("View.ShowAllValues", typeof(MyCommands));
+
+	public static RoutedUICommand ShowAdSchemaDocHelp = new RoutedUICommand(Messages.Help_AdSchemaDocMenuText, "Help.ShowSchemaDoc", typeof(MyCommands), MakeGesture(Key.F1, ModifierKeys.Shift));
 }

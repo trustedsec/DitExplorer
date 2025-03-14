@@ -1,4 +1,5 @@
-﻿using DitExplorer.UI.Behaviors;
+﻿using DitExplorer.Ntds;
+using DitExplorer.UI.Behaviors;
 using DitExplorer.UI.WpfApp.Services;
 using System.ComponentModel;
 using System.ComponentModel.Composition.Hosting;
@@ -16,7 +17,7 @@ namespace DitExplorer.UI.WpfApp;
 /// <summary>
 /// Interaction logic for App.xaml
 /// </summary>
-public partial class App : Application
+public partial class App : Application, ICompositionHost
 {
 	protected override void OnStartup(StartupEventArgs e)
 	{
@@ -32,7 +33,7 @@ public partial class App : Application
 
 		AppViewModel appVM = new AppViewModel();
 
-		CommandFrame.AddGlobalCommandHandler(new GlobalCommandHandler());
+		CommandFrame.AddGlobalCommandHandler(new GlobalCommandHandler(this));
 
 		(this.MainWindow = new MainWindow()
 		{
@@ -42,6 +43,7 @@ public partial class App : Application
 
 	#region Extensibility
 	private CompositionContainer _compContainer;
+	CompositionContainer ICompositionHost.Container => this._compContainer;
 
 	private void InitMef()
 	{
@@ -63,6 +65,7 @@ public partial class App : Application
 
 		const string ManifestSchemaUri = "xsd://DitExplorer/DitExtensionManifest.xsd";
 		List<AssemblyCatalog> assemblyCatalogs = new List<AssemblyCatalog>(manifestFileNames.Length);
+		assemblyCatalogs.Add(new AssemblyCatalog(Assembly.GetExecutingAssembly()));
 		foreach (var manifestFileName in manifestFileNames)
 		{
 			try
@@ -138,8 +141,88 @@ public partial class App : Application
 		wnd.Show();
 		return param;
 	}
+	private static readonly AttributeFormat[] intFormats = new AttributeFormat[]
+	{
+		new AttributeFormat(Messages.Format_General, "G"),
+		new AttributeFormat(Messages.Format_Decimal, "N0"),
+		new AttributeFormat(Messages.Format_Binary, "0b{0:B}"),
+		new AttributeFormat(Messages.Format_Hexadecimal, "0x{0:X}"),
+	};
+	private static readonly AttributeFormat[] enumFormats = new AttributeFormat[]
+	{
+		new AttributeFormat(Messages.Format_Flags, "G"),
+		new AttributeFormat(Messages.Format_Decimal, "D"),
+		new AttributeFormat(Messages.Format_Hexadecimal, "0x{0:X}"),
+	};
+	private static readonly AttributeFormat[] oidFormats = new AttributeFormat[]
+	{
+		new AttributeFormat("LDAP name", "L"),
+		new AttributeFormat("Distinguished Name", "D"),
+		new AttributeFormat("OID", "O"),
+		new AttributeFormat("Encoded", "N"),
+		new AttributeFormat("Encoded (hex)", "0x{0:X}"),
+	};
+	private static readonly AttributeFormat[] dateFormats = new AttributeFormat[]
+	{
+		new AttributeFormat(Messages.Format_General, "G"),
+		new AttributeFormat(Messages.Format_TicksDecimal, "N"),
+		new AttributeFormat(Messages.Format_TicksHex, "0x{0:X}"),
+		new AttributeFormat(Messages.Format_ShortDate, "d"),
+		new AttributeFormat(Messages.Format_LongDate, "D"),
+		new AttributeFormat(Messages.Format_ShortTime, "t"),
+		new AttributeFormat(Messages.Format_LongTime, "T"),
+		new AttributeFormat(Messages.Format_ShortDateTime, "f"),
+		new AttributeFormat(Messages.Format_LongDateTime, "F"),
+		new AttributeFormat(Messages.Format_MonthDay, "m"),
+		new AttributeFormat(Messages.Format_YearMonth, "y"),
+		new AttributeFormat(Messages.Format_Roundtrip, "O"),
+		new AttributeFormat(Messages.Format_Rfc1123, "R"),
+		new AttributeFormat(Messages.Format_Sortable, "s"),
+	};
+	internal static AttributeFormat[] GetDisplayFormatsFor(PropertyDescriptor prop)
+	{
+		if (
+			(prop is DirectoryPropertyDescriptor dirprop)
+			&& (dirprop.AttributeSchema.Syntax?.IsFormattable ?? false)
+			)
+		{
+			return dirprop.AttributeSchema.Syntax.GetDisplayFormats();
+		}
+		else if (prop.PropertyType.IsEnum)
+		{
+			return enumFormats;
+		}
+		else if (prop.PropertyType == typeof(DirectoryTime))
+		{
+			return dateFormats;
+		}
+		else if (prop.PropertyType == typeof(DirectoryOid))
+		{
+			return oidFormats;
+		}
+		else
+		{
+			var tc = Type.GetTypeCode(prop.PropertyType);
+			return tc switch
+			{
+				TypeCode.Byte
+				or TypeCode.SByte
+				or TypeCode.Int16
+				or TypeCode.UInt16
+				or TypeCode.Int32
+				or TypeCode.UInt32
+				or TypeCode.Int64
+				or TypeCode.UInt64 => intFormats,
+				_ => Array.Empty<AttributeFormat>()
+			};
+		}
+	}
 }
 
+internal interface ICompositionHost
+{
+	CompositionContainer Container { get; }
+}
 
 record class CellSpec(object? item, PropertyDescriptor? property)
 {
@@ -147,19 +230,32 @@ record class CellSpec(object? item, PropertyDescriptor? property)
 
 class GlobalCommandHandler : ViewModel
 {
-	internal GlobalCommandHandler()
+	private readonly ICompositionHost host;
+
+	internal GlobalCommandHandler(ICompositionHost host)
 	{
-		RegisterCommand<CellSpec>(MyCommands.CopyValue, CopyValue);
+		this.host = host;
+
+		RegisterCommand<object>(MyCommands.CopyValue, CopyValue);
 		RegisterCommand<ListView>(MyCommands.CopySelection, CopyRows);
 		RegisterCommand<object>(ApplicationCommands.Copy, Copy);
 		RegisterCommand<object>(MyCommands.CopyDN, CopyDN);
 		RegisterCommand<DirectoryNode>(MyCommands.SearchSubtree, SearchSubtree);
+		RegisterCommand<object>(MyCommands.ShowAdSchemaDocHelp, ShowAdSchemaDoc, null, includeNull: true);
+	}
+
+	private void ShowAdSchemaDoc(object obj)
+	{
+		if (obj is IDirectoryNode node)
+			Actions.ShowSchemaHelpAction.ShowDocFor(node);
+		else
+			Actions.ShowSchemaHelpAction.ShowDocFor(obj as IDirectoryObject);
 	}
 
 
 	private void SearchSubtree(DirectoryNode node)
 	{
-		ObjectSearchViewModel vm = new ObjectSearchViewModel(node.Object, node.Owner);
+		ObjectSearchViewModel vm = new ObjectSearchViewModel(this.host, node.Object, node.Owner);
 		SearchWindow wnd = new SearchWindow()
 		{
 			DataContext = vm,
@@ -168,12 +264,40 @@ class GlobalCommandHandler : ViewModel
 		wnd.Show();
 	}
 
-	private void CopyValue(CellSpec cell)
+	private void CopyValue(object target)
 	{
-		var value = cell.property.GetValue(cell.item);
-		if (value != null)
+		if (target is CellSpec cell)
 		{
-			Clipboard.SetText(value.ToString());
+			var value = cell.property.GetValue(cell.item);
+			if (value != null)
+				Clipboard.SetText(value.ToString());
+		}
+		else if (target is TextBlock textBlock)
+		{
+			var value = textBlock.Text;
+			if (value != null)
+				Clipboard.SetText(value);
+		}
+		else
+		{
+			while (target != null)
+			{
+				if (target is ContentPresenter pres)
+					target = pres.Content;
+				else if (target is Decorator dec)
+					target = dec.Child;
+				else if (target is TextBlock txt)
+					target = txt.Text;
+			}
+
+			if (target is string str)
+				Clipboard.SetText(str);
+			else
+			{
+				var value = target?.ToString();
+				if (value != null)
+					Clipboard.SetText(value);
+			}
 		}
 	}
 

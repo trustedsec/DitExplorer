@@ -61,6 +61,15 @@ namespace DitExplorer.UI.WpfApp {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to E_xport Subtree as XML....
+        /// </summary>
+        public static string Action_ExportSubtreeXmlMenuText {
+            get {
+                return ResourceManager.GetString("Action_ExportSubtreeXmlMenuText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to _Cancel.
         /// </summary>
         public static string App_Cancel {
@@ -178,6 +187,15 @@ namespace DitExplorer.UI.WpfApp {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Export Subtree XML.
+        /// </summary>
+        public static string Export_SubtreeXmlDialogTitle {
+            get {
+                return ResourceManager.GetString("Export_SubtreeXmlDialogTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to E_xport....
         /// </summary>
         public static string File_ExportMenuText {
@@ -223,6 +241,168 @@ namespace DitExplorer.UI.WpfApp {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Binary.
+        /// </summary>
+        public static string Format_Binary {
+            get {
+                return ResourceManager.GetString("Format_Binary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Decimal.
+        /// </summary>
+        public static string Format_Decimal {
+            get {
+                return ResourceManager.GetString("Format_Decimal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Flags.
+        /// </summary>
+        public static string Format_Flags {
+            get {
+                return ResourceManager.GetString("Format_Flags", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to General.
+        /// </summary>
+        public static string Format_General {
+            get {
+                return ResourceManager.GetString("Format_General", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hexadecimal.
+        /// </summary>
+        public static string Format_Hexadecimal {
+            get {
+                return ResourceManager.GetString("Format_Hexadecimal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Long Date.
+        /// </summary>
+        public static string Format_LongDate {
+            get {
+                return ResourceManager.GetString("Format_LongDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Long Date/Time.
+        /// </summary>
+        public static string Format_LongDateTime {
+            get {
+                return ResourceManager.GetString("Format_LongDateTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Long Time.
+        /// </summary>
+        public static string Format_LongTime {
+            get {
+                return ResourceManager.GetString("Format_LongTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Month/Day.
+        /// </summary>
+        public static string Format_MonthDay {
+            get {
+                return ResourceManager.GetString("Format_MonthDay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RFC 1123.
+        /// </summary>
+        public static string Format_Rfc1123 {
+            get {
+                return ResourceManager.GetString("Format_Rfc1123", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Roundtrip.
+        /// </summary>
+        public static string Format_Roundtrip {
+            get {
+                return ResourceManager.GetString("Format_Roundtrip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Short Date.
+        /// </summary>
+        public static string Format_ShortDate {
+            get {
+                return ResourceManager.GetString("Format_ShortDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Short Date/Time.
+        /// </summary>
+        public static string Format_ShortDateTime {
+            get {
+                return ResourceManager.GetString("Format_ShortDateTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Short Time.
+        /// </summary>
+        public static string Format_ShortTime {
+            get {
+                return ResourceManager.GetString("Format_ShortTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sortable.
+        /// </summary>
+        public static string Format_Sortable {
+            get {
+                return ResourceManager.GetString("Format_Sortable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ticks (decimal).
+        /// </summary>
+        public static string Format_TicksDecimal {
+            get {
+                return ResourceManager.GetString("Format_TicksDecimal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ticks (hexadecimal).
+        /// </summary>
+        public static string Format_TicksHex {
+            get {
+                return ResourceManager.GetString("Format_TicksHex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Year/Month.
+        /// </summary>
+        public static string Format_YearMonth {
+            get {
+                return ResourceManager.GetString("Format_YearMonth", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Description.
         /// </summary>
         public static string General_DescriptionColumnHeader {
@@ -259,6 +439,15 @@ namespace DitExplorer.UI.WpfApp {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Active Directory Schema Documentation.
+        /// </summary>
+        public static string Help_AdSchemaDocMenuText {
+            get {
+                return ResourceManager.GetString("Help_AdSchemaDocMenuText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Inc_lude subclasses.
         /// </summary>
         public static string IncludeSubclasses_Label {
@@ -277,6 +466,15 @@ namespace DitExplorer.UI.WpfApp {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to _Help.
+        /// </summary>
+        public static string MainMenu_HelpMenuText {
+            get {
+                return ResourceManager.GetString("MainMenu_HelpMenuText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to _View.
         /// </summary>
         public static string MainMenu_ViewMenuText {
@@ -291,6 +489,15 @@ namespace DitExplorer.UI.WpfApp {
         public static string MainWindowTitle {
             get {
                 return ResourceManager.GetString("MainWindowTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;none&gt;.
+        /// </summary>
+        public static string NonePlaceholder {
+            get {
+                return ResourceManager.GetString("NonePlaceholder", resourceCulture);
             }
         }
         
@@ -439,6 +646,51 @@ namespace DitExplorer.UI.WpfApp {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to By _Attribute.
+        /// </summary>
+        public static string Search_ByAttributeCaption {
+            get {
+                return ResourceManager.GetString("Search_ByAttributeCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to By _GUID.
+        /// </summary>
+        public static string Search_ByGuidCaption {
+            get {
+                return ResourceManager.GetString("Search_ByGuidCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to By _LDAP Query.
+        /// </summary>
+        public static string Search_ByLdapQuery {
+            get {
+                return ResourceManager.GetString("Search_ByLdapQuery", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to By _Name.
+        /// </summary>
+        public static string Search_ByNameAccessText {
+            get {
+                return ResourceManager.GetString("Search_ByNameAccessText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to By _SID.
+        /// </summary>
+        public static string Search_BySidCaption {
+            get {
+                return ResourceManager.GetString("Search_BySidCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Directory Search.
         /// </summary>
         public static string SubtreeSearch_Title {
@@ -462,6 +714,15 @@ namespace DitExplorer.UI.WpfApp {
         public static string View_DatabaseSchema {
             get {
                 return ResourceManager.GetString("View_DatabaseSchema", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display _Format.
+        /// </summary>
+        public static string View_DisplayFormatMenuText {
+            get {
+                return ResourceManager.GetString("View_DisplayFormatMenuText", resourceCulture);
             }
         }
     }

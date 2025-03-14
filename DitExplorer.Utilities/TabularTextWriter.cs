@@ -24,7 +24,7 @@ namespace DitExplorer.UI.WpfApp
 		/// Writes a value.
 		/// </summary>
 		/// <param name="text">Value to write</param>
-		public void WriteValue(string text)
+		public void WriteValue(string? text)
 		{
 			if (_lineHasValue)
 				WriteSeparator();
@@ -40,8 +40,7 @@ namespace DitExplorer.UI.WpfApp
 		{
 			if (text.IndexOfAny(EscapedChars) >= 0)
 			{
-				if (text.Contains("\""))
-					text = text.Replace("\"", "\"\"");
+				text = text.Replace("\"", "\"\"");
 
 				// TODO: Yeah, this could be more efficient using the TextWriter properly
 

@@ -97,6 +97,24 @@ namespace DitExplorer.Ntds {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The schema container was not find in the .dit file..
+        /// </summary>
+        internal static string Error_SchemaContainerNotFound {
+            get {
+                return ResourceManager.GetString("Error_SchemaContainerNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The extended DN contained an unknown attribute..
+        /// </summary>
+        internal static string NtdsDirectory_BadExtendedDn {
+            get {
+                return ResourceManager.GetString("NtdsDirectory_BadExtendedDn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The object is disposed and can no longer be used..
         /// </summary>
         internal static string ObjectDisposedMessage {
